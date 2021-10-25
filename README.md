@@ -341,7 +341,7 @@ product.get_changed_values()
 
 ## عند مواجهة مشكلة
 
-لاتتردد في رفع [issues](https://github.com/SallaApp/salla/issues) عند مواجهة اي مشكلة
+لاتتردد في رفع [issues](https://github.com/TheAwiteb/salla/issues) عند مواجهة اي مشكلة
 
 ## الرخصة
 هذا المشروع تحت رخصة ([MIT](https://opensource.org/licenses/MIT))
