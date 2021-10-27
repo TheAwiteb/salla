@@ -2,7 +2,8 @@ from datetime import datetime
 from pydantic import BaseModel, validator
 from typing import Optional, Union, List, Any
 from .apihelper import apihelper
-from .exceptions import PaginationError, InvalidValueError, SaveProductErorr
+from .exceptions import PaginationError, SaveProductErorr
+from .validators import date_parser, choice_validator
 from .types import (
     Promotion,
     Urls,
@@ -308,13 +309,7 @@ class Product(BaseModel):
         المخرجات:
             datetime: التاريخ بعد تحويله
         """
-        if date:
-            try:
-                return datetime.strptime(
-                    date, "%Y-%m-%d %X" if len(date) > 12 else "%Y-%m-%d"
-                )
-            except:
-                return date
+        return date_parser(cls, date)
 
     @validator("status")
     @classmethod
@@ -330,11 +325,9 @@ class Product(BaseModel):
         المخرجات:
             str: بعد التحقق من وجوده ضمن القيم المسموحة status ال
         """
-        if status_value not in (
-            choices := ["none", "sale", "out", "hidden", "deleted"]
-        ):
-            raise InvalidValueError(wrong_value=status_value, choices=choices)
-        return status_value
+        return choice_validator(
+            cls, status_value, ["none", "sale", "out", "hidden", "deleted"]
+        )
 
     @validator("type")
     @classmethod
@@ -350,8 +343,10 @@ class Product(BaseModel):
         المخرجات:
             str: بعد التحقق من وجوده ضمن القيم المسموحة type ال
         """
-        if type_value not in (
-            choices := [
+        return choice_validator(
+            cls,
+            type_value,
+            [
                 "product",
                 "service",
                 "group_products",
@@ -359,10 +354,8 @@ class Product(BaseModel):
                 "digital",
                 "food",
                 "donating",
-            ]
-        ):
-            raise InvalidValueError(wrong_value=type_value, choices=choices)
-        return type_value
+            ],
+        )
 
 
 class ProductList(BaseModel):

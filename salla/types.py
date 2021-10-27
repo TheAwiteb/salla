@@ -3,7 +3,7 @@
 
 from pydantic import BaseModel, validator, HttpUrl, Field
 from typing import Optional, List
-from .exceptions import InvalidValueError
+from .validators import choice_validator
 
 
 class Promotion(BaseModel):
@@ -67,20 +67,7 @@ class Image(BaseModel):
     @validator("type")
     @classmethod
     def type_validator(cls, type_value: str) -> str:
-        """التحقق من صحة النوع فديو ام صورة
-
-        المتغيرات:
-            type_value (str): قيمة النوع المراد التحقق منها
-
-        الاخطاء:
-            InvalidValueError: حطأ بعدم صحة قيمة النوع
-
-        المخرجات:
-            str: النوع بعد التاكد من صحته
-        """
-        if type_value not in (choices := ["image", "video"]):
-            raise InvalidValueError(wrong_value=type_value, choices=choices)
-        return type_value
+        return choice_validator(cls, type_value, ["image", "video"])
 
 
 class Rating(BaseModel):
@@ -231,9 +218,7 @@ class Option(BaseModel):
         المخرجات:
             str: بعد التحقق من وجوده ضمن القيم المسموحة display_type ال
         """
-        if display_type_value not in (choices := ["color", "image", "text"]):
-            raise InvalidValueError(wrong_value=display_type_value, choices=choices)
-        return display_type_value
+        return choice_validator(cls, display_type_value, ["color", "image", "text"])
 
     @validator("visibility")
     @classmethod
@@ -249,9 +234,7 @@ class Option(BaseModel):
         المخرجات:
             str: بعد التحقق من وجوده ضمن القيم المسموحة visibility ال
         """
-        if visibility_value not in (choices := ["always", "on_condition"]):
-            raise InvalidValueError(wrong_value=visibility_value, choices=choices)
-        return visibility_value
+        return choice_validator(cls, visibility_value, ["always", "on_condition"])
 
 
 class Categories(BaseModel):
@@ -310,9 +293,7 @@ class Categories(BaseModel):
         المخرجات:
             str: بعد التحقق من وجوده ضمن القيم المسموحة status ال
         """
-        if status_value not in (choices := ["active", "hidden"]):
-            raise InvalidValueError(wrong_value=status_value, choices=choices)
-        return status_value
+        return choice_validator(cls, status_value, ["active", "hidden"])
 
 
 class Brand(BaseModel):
