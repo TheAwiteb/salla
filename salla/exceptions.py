@@ -48,14 +48,13 @@ class RateLimitError(PydanticValueError):
     msg_template = "You have exceeded the Rate limit which was {ratelimit_limit}, it will renew after a second to {ratelimit_limit}"
 
 
-class SaveProductError(PydanticValueError):
+class AuthorizationError(PydanticValueError):
     """
-    خطأ عند حفظ المنتج
+    خطأ التعرف على المتجر (التوكن غير صحيح)
     """
 
-    code = "save_product_error"
-    message: str
-    msg_template = "Product save error, {message}"
+    code = "unauthorized"
+    msg_template = "Please provide a valid authorization token"
 
 
 class APIError(PydanticValueError):
