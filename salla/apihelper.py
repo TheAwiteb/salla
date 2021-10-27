@@ -1,8 +1,32 @@
 import requests
-from time import sleep
 from pydantic import BaseModel
 from typing import Optional, Union
-from .exceptions import APIError, RateLimitError
+from .exceptions import APIError, RateLimitError, AuthorizationError
+
+
+class ErrorResponse(BaseModel):
+    """
+    API خطأ مصدره الـ
+    """
+
+    class Error(BaseModel):
+        code: str
+        """ رمز الخطأ """
+
+        message: Optional[str]
+        """ رسالة الخطأ """
+
+        fields: dict = dict()
+        """ الحقول التي توجد بها الخطأ """
+
+    status: int
+    """ الحالة رمز الرسبونس """
+
+    success: bool
+    """ حالة الرسبونس تم ام لم يتم """
+
+    error: Error
+    """ الخطأ """
 
 
 class ApiHelper(BaseModel):
@@ -80,23 +104,37 @@ class ApiHelper(BaseModel):
 
         response = request(url, headers=self.header, **kwargs)
 
-        self.ratelimit_remaining = response.headers.get("x-ratelimit-remaining")
-        self.ratelimit_limit = response.headers.get(
-            "x-ratelimit-limit", self.ratelimit_limit
-        )
-
         if (response_json := response.json()).get("success"):
+            self.ratelimit_remaining = response.headers.get("x-ratelimit-remaining")
+            self.ratelimit_limit = response.headers.get(
+                "x-ratelimit-limit", self.ratelimit_limit
+            )
             return response_json
         else:
-            if not self.ratelimit_remaining:
-                sleep(1)
-                raise RateLimitError(self.ratelimit_limit)
-            else:
-                raise APIError(
-                    f"""{response_json.get('error', {}).get('message')}\r
-                    \r{'' if not (error_list := response_json.get('fields')) else ', ' + ' ,'.join(msg for lst in error_list.values() for msg in lst)}
-                    \r"""
-                )
+            self.error_handler(ErrorResponse(**response_json))
+
+    def error_handler(self, error: ErrorResponse) -> None:
+        """ميثود تستقبل الاخطأ ومعالجتها
+
+        المتغيرات:
+            error (ErrorResponse): الخطأ المراد معالجته
+
+        الاخطأ:
+            AuthorizationError: خطأ بالتعرف على المتجر (التوكن غير صحيح)
+            RateLimitError: تعدي حد الطلبات
+            APIError: API خطأ من ال
+        """
+        message = error.error.message
+        if error.error.code == "Unauthorized":
+            raise AuthorizationError
+        elif error.status == 429:
+            raise RateLimitError(sratelimit_limit=self.ratelimit_limit)
+        else:
+            raise APIError(
+                msg_template=f"""{message}\r
+                \r{', ' if error.error.fields else '' + ' ,'.join(msg for lst in error.error.fields.values() for msg in lst)}
+                \r""".strip()
+            )
 
     def query2dict(self, query: str) -> dict:
         """تحويل الباراميتر حقت الرابط الى قاموس
