@@ -207,5 +207,18 @@ class ApiHelper(BaseModel):
         method = "DELETE"
         self.make_request(method_name, method)
 
+    def store_details(self) -> dict:
+        """ ارجاع تفاصيل المتجر
+
+        المخرجات:
+            dict: تفاصيل المتجر
+        """
+        method_name = "oauth2/user/info"
+        method = "GET"
+        response_dct = self.make_request(method_name, method).get("data")
+        details = response_dct.pop("store")
+        details.update(owner=response_dct)
+        return details
+
 
 apihelper = ApiHelper()
