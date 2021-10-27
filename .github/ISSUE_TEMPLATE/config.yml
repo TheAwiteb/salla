@@ -1,0 +1,9 @@
+blank_issues_enabled: true
+contact_links:
+- name: Question (سؤال)
+  url: 'https://github.com/TheAwiteb/salla/discussions/new?category=question'
+  about: اسال سؤال حول مكتبة سلة في قسم المناقشات
+
+- name: Feature Request (طلب ميزة جديدة)
+  url: 'https://github.com/TheAwiteb/salla/discussions/new?category=feature-request'
+  about: اذا كنت تضن ان مكتبة سلة بحاجة الى ميزة جديدة يمكن اخبارنا بها في قسم المناقشات
