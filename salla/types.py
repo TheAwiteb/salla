@@ -3,7 +3,8 @@
 
 from pydantic import BaseModel, validator, HttpUrl, Field
 from typing import Optional, List
-from .validators import choice_validator
+from datetime import datetime
+from .validators import choice_validator, date_parser
 
 
 class Promotion(BaseModel):
@@ -350,3 +351,75 @@ class Pagination(BaseModel):
 
     links: Links
     """ الروابط، التالي والسابق"""
+
+class Store(BaseModel):
+    """
+    بيانات المتجر
+    """
+
+    class Owner(BaseModel):
+        """
+        بيانات صاحب المتجر
+        """
+
+        id: int
+        """ الايدي الخاص بصاحب المتجر """
+
+        name: str
+        """ اسم صاحب المتجر """
+
+        email: str
+        """ الايميل الخاص بصاحب المتجر"""
+
+        mobile: str
+        """ رقم صاحب المتجر """
+
+        role: str
+
+        created_at: datetime
+        """ تاريخ انشاء حساب صاحب المتجر """
+
+        @validator("created_at", pre=True)
+        @classmethod
+        def date_parser(cls, date):
+            return date_parser(cls, date)
+
+    id: int
+    """ ايدي المتجر """
+
+    owner: Owner
+    """ معلومات صاحب المتجر """
+
+    username: str
+    """ اسم المتجر (يظهر في الرابط)"""
+
+    name: str
+    """ اسم المتجر (يظهر في المتجر)"""
+
+    avatar: Optional[str]
+    """ الصورة الخاصة بالمتجر """
+
+    store_location: Optional[str]
+    """ موقع المتجر """
+
+    plan: str
+    """ خطة المتجر """
+
+    status: str
+    """ حالة المتجر """
+
+    created_at: datetime
+    """ تاريخ انشاء المتجر"""
+
+    @validator("created_at", pre=True)
+    @classmethod
+    def date_parser(cls, date) -> datetime:
+        """datetime تحويل التاريخ من نص الى
+
+        المتغيرات:
+            date (str): التاريخ بشكل نص
+
+        المخرجات:
+            datetime: التاريخ بعد تحويله
+        """
+        return date_parser(cls, date)
