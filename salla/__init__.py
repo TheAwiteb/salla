@@ -1,25 +1,48 @@
+from pydantic import BaseModel
 from .product import ProductList
-from .apihelper import apihelper
+from typing import Optional
+from .apihelper import ApiHelper, apihelper as api_helper
+from .types import Store
 
 
-class Salla:
+class Salla(BaseModel):
     """
     المتجر الخاص بك يمكنك القيام بالعمليات التي توفرها سلة من خلاله
     https://docs.salla.dev/docs/merchent/
     """
 
+    class Config:
+        validate_assignment = True
+
+    token: str
+    """ التوكن الخاص بالمتجر"""
+
+    enable_logging: Optional[bool]
+    """ تسجيل الاحداث """
+
+    logging_filename: Optional[str]
+    """ اسم ملف الاحداث """
+
+    details: Optional[Store]
+    """ تفاصيل المتجر """
+
+    apihelper: ApiHelper = api_helper
+    """ API الوسيط بين المتجر و ال"""
+
     def __init__(
-        self,
-        token: str,
-        enable_logging: bool = True,
-        logging_filename: str = "logging.log",
+        self, token, enable_logging: bool = True, logging_filename: str = "logging.log"
     ) -> None:
 
-        self.token = token
-        self.apihelper = apihelper
+        super(Salla, self).__init__(
+            token=token,
+            enable_logging=enable_logging,
+            logging_filename=logging_filename,
+        )
         self.apihelper.token = token
-        self.apihelper.enable_logging = (enable_logging,)
-        self.apihelper.logging_filename = (logging_filename,)
+        self.apihelper.enable_logging = enable_logging
+        self.apihelper.logging_filename = logging_filename
+
+        self.details = self.apihelper.store_details()
 
     def products(
         self,
