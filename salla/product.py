@@ -288,7 +288,7 @@ class Product(BaseModel):
                 )
             self.previous_dict = self.dict().copy()
         else:
-            raise SaveProductErorr("No changes have been made to the product.")
+            raise SaveProductErorr(message="No changes have been made to the product.")
 
     def delete(self) -> None:
         """
