@@ -5,6 +5,7 @@ from pydantic import BaseModel, validator, HttpUrl, Field
 from typing import Optional, List
 from datetime import datetime
 from .validators import choice_validator, date_parser
+import salla
 
 
 class Promotion(BaseModel):
@@ -394,6 +395,9 @@ class Store(BaseModel):
     username: str
     """ اسم المتجر (يظهر في الرابط)"""
 
+    url: Optional[str]
+    """ الرابط الخاص بالمتجر """
+
     name: str
     """ اسم المتجر (يظهر في المتجر)"""
 
@@ -411,6 +415,10 @@ class Store(BaseModel):
 
     created_at: datetime
     """ تاريخ انشاء المتجر"""
+
+    def __init__(self, **kwargs) -> None:
+        super(Store, self).__init__(**kwargs)
+        self.url = salla.SALLA_URL + self.username
 
     @validator("created_at", pre=True)
     @classmethod
