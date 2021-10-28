@@ -1,6 +1,8 @@
 from pydantic import BaseModel
-from .product import ProductList
 from typing import Optional
+from os import getenv
+from .exceptions import EnvironmentVariableError
+from .product import ProductList
 from .version import __version__
 from .apihelper import ApiHelper, apihelper as api_helper
 from .types import Store
@@ -39,6 +41,11 @@ class Salla(BaseModel):
     def __init__(
         self, token, enable_logging: bool = True, logging_filename: str = "logging.log"
     ) -> None:
+
+        if token == "TOKEN":
+            token = getenv("SALLA_TOKEN")
+            if not token:
+                raise EnvironmentVariableError(name="token", env_variable="SALLA_TOKEN")
 
         super(Salla, self).__init__(
             token=token,
