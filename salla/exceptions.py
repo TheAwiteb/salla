@@ -64,3 +64,14 @@ class APIError(PydanticValueError):
 
     code = "api_error"
     msg_template: str
+
+
+class EnvironmentVariableError(PydanticValueError):
+    """
+    خطأ في جلب متغير من البيئة
+    """
+
+    code = "environment_variable_error"
+    name: str
+    env_variable: str
+    msg_template: str = 'Cannot get {name} from environment, you should export it as "{env_variable}"\nexample: "export {env_variable}={name} here"'
