@@ -8,6 +8,9 @@ from .types import Store
 version = __version__
 """ اصدار المكتبة """
 
+SALLA_URL = "https://salla.sa/"
+""" الرابط الخاص بموقع سلة """
+
 
 class Salla(BaseModel):
     """
