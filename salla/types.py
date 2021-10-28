@@ -352,6 +352,7 @@ class Pagination(BaseModel):
     links: Links
     """ الروابط، التالي والسابق"""
 
+
 class Store(BaseModel):
     """
     بيانات المتجر

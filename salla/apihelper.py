@@ -208,7 +208,7 @@ class ApiHelper(BaseModel):
         self.make_request(method_name, method)
 
     def store_details(self) -> dict:
-        """ ارجاع تفاصيل المتجر
+        """ارجاع تفاصيل المتجر
 
         المخرجات:
             dict: تفاصيل المتجر
