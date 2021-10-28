@@ -1,8 +1,12 @@
 from pydantic import BaseModel
 from .product import ProductList
 from typing import Optional
+from .version import __version__
 from .apihelper import ApiHelper, apihelper as api_helper
 from .types import Store
+
+version = __version__
+""" اصدار المكتبة """
 
 
 class Salla(BaseModel):
