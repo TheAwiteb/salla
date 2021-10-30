@@ -1,10 +1,10 @@
 from datetime import datetime
 from pydantic import BaseModel, validator
 from typing import Optional, Union, List, Any
-from .apihelper import apihelper
-from .exceptions import PaginationError, SaveProductErorr
-from .validators import date_parser, choice_validator
-from .types import (
+from salla.apihelper import apihelper
+from salla.exceptions import PaginationError, SaveProductErorr
+from salla.validators import date_parser, choice_validator
+from salla.types import (
     Promotion,
     Urls,
     Price,

@@ -1,6 +1,6 @@
 from typing import Any, List
 from datetime import datetime
-from .exceptions import InvalidValueError
+from salla import exceptions
 
 
 def date_parser(cls, date: str) -> datetime:
@@ -34,5 +34,5 @@ def choice_validator(cls, value: Any, choices: List[Any]) -> Any:
         Any: القيمة بعد التاكد من صحته
     """
     if value not in choices:
-        raise InvalidValueError(wrong_value=value, choices=choices)
+        raise exceptions.InvalidValueError(wrong_value=value, choices=choices)
     return value

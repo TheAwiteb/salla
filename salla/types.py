@@ -4,9 +4,9 @@
 from pydantic import BaseModel, validator, HttpUrl, Field
 from typing import Optional, List
 from datetime import datetime
-from .validators import choice_validator, date_parser
-from .apihelper import apihelper
 import salla
+from salla.validators import choice_validator, date_parser
+from salla.apihelper import apihelper
 
 
 class Promotion(BaseModel):

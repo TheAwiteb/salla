@@ -1,13 +1,14 @@
 from pydantic import BaseModel
 from typing import Optional
 from os import getenv
-from .exceptions import EnvironmentVariableError
-from .product import ProductList
-from .version import __version__
-from .apihelper import apihelper
-from .types import Store
+import salla.exceptions
+import salla.product
+import salla.version
+import salla.apihelper
+import salla.types
+import salla.validators
 
-version = __version__
+version = salla.version.__version__
 """ اصدار المكتبة """
 
 SALLA_URL = "https://salla.sa/"
@@ -32,7 +33,7 @@ class Salla(BaseModel):
     logging_filename: Optional[str]
     """ اسم ملف الاحداث """
 
-    details: Optional[Store]
+    details: Optional[salla.types.Store]
     """ تفاصيل المتجر """
 
     def __init__(
@@ -42,18 +43,18 @@ class Salla(BaseModel):
         if token == "TOKEN":
             token = getenv("SALLA_TOKEN")
             if not token:
-                raise EnvironmentVariableError(name="token", env_variable="SALLA_TOKEN")
+                raise salla.exceptions.EnvironmentVariableError(name="token", env_variable="SALLA_TOKEN")
 
         super(Salla, self).__init__(
             token=token,
             enable_logging=enable_logging,
             logging_filename=logging_filename,
         )
-        apihelper.token = token
-        apihelper.enable_logging = enable_logging
-        apihelper.logging_filename = logging_filename
+        salla.apihelper.apihelper.token = token
+        salla.apihelper.apihelper.enable_logging = enable_logging
+        salla.apihelper.apihelper.logging_filename = logging_filename
 
-        self.details = apihelper.store_details()
+        self.details = salla.apihelper.apihelper.store_details()
 
     def products(
         self,
@@ -62,7 +63,7 @@ class Salla(BaseModel):
         page: int = None,
         per_page: int = None,
         status: str = None,
-    ) -> ProductList:
+    ) -> salla.product.ProductList:
         """
         يمكنك سرد جميع المنتجات المتاحة المتعلقة بمتجرك مباشرة
             أيضًا ، يسمح لك بتصفية الكلمات الرئيسية والحالة والفئة.
@@ -93,7 +94,7 @@ class Salla(BaseModel):
             key: val for key, val in locals().items() if key not in ["params", "self"]
         }
 
-        response_json = apihelper.products(params=params)
+        response_json = salla.apihelper.apihelper.products(params=params)
         products = response_json.get("data", [])
         pagination = response_json.get("pagination", {})
-        return ProductList(products=products, pagination=pagination)
+        return salla.product.ProductList(products=products, pagination=pagination)

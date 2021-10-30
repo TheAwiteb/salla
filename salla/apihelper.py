@@ -1,7 +1,7 @@
 import requests
 from pydantic import BaseModel
 from typing import Optional, Union
-from .exceptions import APIError, RateLimitError, AuthorizationError
+from salla.exceptions import (APIError, RateLimitError, AuthorizationError)
 
 
 class ErrorResponse(BaseModel):
