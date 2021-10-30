@@ -5,6 +5,7 @@ from pydantic import BaseModel, validator, HttpUrl, Field
 from typing import Optional, List
 from datetime import datetime
 from .validators import choice_validator, date_parser
+from .apihelper import apihelper
 import salla
 
 
@@ -42,17 +43,51 @@ class Price(BaseModel):
     """ العملة """
 
 
+class ImageDetails(BaseModel):
+    """تفاصيل الصورة"""
+
+    class Details(BaseModel):
+        """التفاصيل"""
+
+        url: HttpUrl
+        """ رابط الصورة """
+
+        width: int
+        """ عرض الصورة """
+
+        height: int
+        """ طول الصورة """
+
+    original: Details
+    """ الصورة الاصلية """
+
+    standard_resolution: Details
+    """ الصورة بجودة متوسطة """
+
+    low_resolution: Details
+    """ الصورة بجودة منخفضة """
+
+    thumbnail: Details
+    """ الثامنيل """
+
+
 class Image(BaseModel):
     """الصورة او الفديو الخاصة بالمنتج"""
 
     id: int
     """ الايدي الخاص بالصورة او الفديو """
 
+    image: Optional[ImageDetails]
+    """ تفاصيل صورة المنتج """
+
     url: HttpUrl
     """ الرابط الخاص بالصورة """
 
     alt: Optional[str]
     """ النص بديل الصورة اذ لم تكن تعمل """
+
+    alt_seo: Optional[str]
+    """ وصف الفديو """
 
     video_url: Optional[str]  # Optional[HttpUrl]
     """ الرابط الخاص بالفديو """
@@ -65,6 +100,12 @@ class Image(BaseModel):
 
     sort: int
     """ ترتيب الصورة او الفديو بين باقي الصور """
+
+    default: Optional[bool]
+    """ الصورة هي الصورة الافتراضية للمنتج """
+
+    def delete(self) -> None:
+        apihelper.delete_image(self.id)
 
     @validator("type")
     @classmethod
