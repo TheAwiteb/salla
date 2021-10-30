@@ -220,5 +220,33 @@ class ApiHelper(BaseModel):
         details.update(owner=response_dct)
         return details
 
+    def attach_youtube_video(self, product_id: str, **kwargs) -> dict:
+        """اضافة مقطع يوتيوب الى المنتج
+
+        المتغيرات:
+            product_id (str): ايدي المنتج المراد اضافة الفديو له
+
+        المخرجات:
+            dict: قاموس يحتوي الفديو اللذي تم اضافته
+        """
+        method_name = f"products/{product_id}/video"
+        method = "POST"
+        response_dict = self.make_request(method_name, method, **kwargs).get("data")
+        response_dict["sort"] = response_dict.get("sort") or 0
+        response_dict.update(url=response_dict["image"]["original"].get("url"))
+        return response_dict
+
+    def delete_image(self, image_id: int) -> None:
+        """مسخ الصورة الخاصة بالمنتج
+
+        المتغيرات:
+            image_id (int): ايدي الصورة المراد حذفها
+        """
+        # TODO: مسح الصورة من المصفوفة التي تحتوي الصورة (في المنتج)
+        method_name = f"products/images/{image_id}"
+        method = "DELETE"
+        self.make_request(method_name, method)
+
 
 apihelper = ApiHelper()
+""" API الوسيط بين المتجر و ال"""

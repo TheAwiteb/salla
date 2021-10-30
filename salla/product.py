@@ -273,6 +273,26 @@ class Product(BaseModel):
             self.status = new_status
             apihelper.change_status(self.id, new_status)
 
+    def attach_youtube_video(
+        self,
+        youtube_video_url: str,
+        default: bool = False,
+        alt: str = str(),
+        sort: int = 0,
+    ) -> None:
+        """اضافة مقطع يوتيوب الى المنتج
+
+        المتغيرات:
+            youtube_video_url (str): رابط مقطع اليوتيوب المراد اضافته الى المنتج
+            default (bool, optional): جعل الفديو هو الميديا الافتراضية للمنتج. Defaults to False.
+            alt (str, optional): وصف الفديو (سوف يظهر عندما يتعطل الرابط). Defaults to str().
+            sort (int, optional): ترتيب الفديو بين الميديا الخاصة بالمنتج. Defaults to 0.
+        """
+        data = {}
+        data.update(video_url=youtube_video_url, default=default, alt=alt, sort=sort)
+        image = Image(**apihelper.attach_youtube_video(product_id=self.id, json=data))
+        self.images.append(image)
+
     def save(self):
         """
         حفط التغيرات التي حدثت على المنتج
