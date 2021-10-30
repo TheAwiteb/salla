@@ -4,7 +4,7 @@ from os import getenv
 from .exceptions import EnvironmentVariableError
 from .product import ProductList
 from .version import __version__
-from .apihelper import ApiHelper, apihelper as api_helper
+from .apihelper import apihelper
 from .types import Store
 
 version = __version__
@@ -35,9 +35,6 @@ class Salla(BaseModel):
     details: Optional[Store]
     """ تفاصيل المتجر """
 
-    apihelper: ApiHelper = api_helper
-    """ API الوسيط بين المتجر و ال"""
-
     def __init__(
         self, token, enable_logging: bool = True, logging_filename: str = "logging.log"
     ) -> None:
@@ -52,11 +49,11 @@ class Salla(BaseModel):
             enable_logging=enable_logging,
             logging_filename=logging_filename,
         )
-        self.apihelper.token = token
-        self.apihelper.enable_logging = enable_logging
-        self.apihelper.logging_filename = logging_filename
+        apihelper.token = token
+        apihelper.enable_logging = enable_logging
+        apihelper.logging_filename = logging_filename
 
-        self.details = self.apihelper.store_details()
+        self.details = apihelper.store_details()
 
     def products(
         self,
@@ -96,7 +93,7 @@ class Salla(BaseModel):
             key: val for key, val in locals().items() if key not in ["params", "self"]
         }
 
-        response_json = self.apihelper.products(params=params)
+        response_json = apihelper.products(params=params)
         products = response_json.get("data", [])
         pagination = response_json.get("pagination", {})
         return ProductList(products=products, pagination=pagination)
