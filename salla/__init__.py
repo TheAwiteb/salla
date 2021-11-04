@@ -45,7 +45,9 @@ class Salla(BaseModel):
         if token == "TOKEN":
             token = getenv("SALLA_TOKEN")
             if not token:
-                raise salla.exceptions.EnvironmentVariableError(name="token", env_variable="SALLA_TOKEN")
+                raise salla.exceptions.EnvironmentVariableError(
+                    name="token", env_variable="SALLA_TOKEN"
+                )
 
         super(Salla, self).__init__(
             token=token,
