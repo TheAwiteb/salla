@@ -18,7 +18,7 @@ with open("salla/version.py", "r", encoding="utf-8") as f:
     ).group(1)
 
 setup(
-    name="test-salla-pup-tetetetst",
+    name="salla",
     version=version,
     description="Python Salla api.",
     long_description=long_description,
