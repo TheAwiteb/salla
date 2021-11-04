@@ -559,3 +559,19 @@ class ListHelper:
             Any: العنصر بحسب الاندكس اعلاه
         """
         return self.__dict__.get(self.list_name).__getitem__(index)
+
+
+class ImageList(ListHelper, BaseModel):
+    """
+    كلاس يحتوي مصفوفة الصور، ويمكنك من خلاله مسح الميدياء
+    """
+
+    images: List[Image]
+    """ الميدياء """
+
+    list_name: Optional[str]
+    """اسم المصفوفة التي تحتوي الميدياء"""
+
+    def __init__(self, **kwargs) -> None:
+        BaseModel.__init__(self, **kwargs)
+        ListHelper.__init__(self, images=self.images)
