@@ -15,6 +15,7 @@ from salla.types import (
     Skus,
     Categories,
     Pagination,
+    ListHelper,
 )
 
 
@@ -378,7 +379,7 @@ class Product(BaseModel):
         )
 
 
-class ProductList(BaseModel):
+class ProductList(ListHelper, BaseModel):
     """
     كلاس يحتوي مصفوفة المنتجات، ويمكنك من خلاله التحكم بالصفحات
     """
@@ -388,6 +389,13 @@ class ProductList(BaseModel):
 
     pagination: Pagination
     """ ترقيم الصفحات """
+
+    list_name: Optional[str]
+    """ اسم المصفوفة التي تحتوي المنتجات """
+
+    def __init__(self, **kwargs) -> None:
+        BaseModel.__init__(self, **kwargs)
+        ListHelper.__init__(self, products=self.products)
 
     def have_next(self) -> bool:
         """ارجاع قيمة صحيحة اذ وجد صفحة تالية
@@ -459,67 +467,3 @@ class ProductList(BaseModel):
                 raise PaginationError(message=f"Invalid page number, {page_number}.")
         else:
             raise TypeError
-
-    def first(self) -> Product:
-        """ارجاع اول منتج في المصفوفة
-
-        المخرجات:
-            Product: المنتج
-        """
-        return self.__getitem__(0)
-
-    def last(self) -> Product:
-        """ارجاع اخر منتج في المصفوفة
-
-        المخرجات:
-            Product: المنتج
-        """
-        return self.__getitem__(-1)
-
-    def __iter__(self):
-        return self.products.__iter__()
-
-    def __next__(self):
-        return self.products.__next__()
-
-    def __len__(self) -> int:
-        """ارجاع عدد المنتجات التي في المصفوفة
-
-        المخرجات:
-            int: عدد المنتجات
-        """
-        return self.products.__len__()
-
-    def __eq__(self, other: "ProductList") -> bool:
-        """ارجاع صحيح اذا تطابقت المصفوفة مع المصفوفة المعطاء
-
-        المتغيرات:
-            other (ProductList): المصفوفة المراد التحقق من منتجاتها
-
-        الاخطاء:
-            TypeError: نوع غير صحيح
-
-        المخرجات:
-            bool: صحيح اذا كانت متطابقة
-        """
-        if type(other) == ProductList:
-            return all(
-                product == other_product
-                for product, other_product in zip(self.products, other.products)
-            )
-        else:
-            raise TypeError
-
-    def __getitem__(self, index: int) -> Product:
-        """جلب عنصر من المصفوفة
-
-        المتغيرات:
-            index (int): الاندكس
-
-        الاخطاء:
-            IndexError: الاندكس ليس موجود في المصفوفة (اكبر من حجمها)
-
-        المخرجات:
-            Product: المنتج بحسب الاندكس اعلاه
-        """
-        return self.products.__getitem__(index)
