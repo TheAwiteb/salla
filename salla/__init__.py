@@ -8,6 +8,8 @@ import salla.apihelper
 import salla.types
 import salla.validators
 
+version_info = salla.version.version_info
+
 version = salla.version.__version__
 """ اصدار المكتبة """
 
