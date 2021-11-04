@@ -23,7 +23,7 @@ assignees: ''
 
 </div>
 
-`python3 -c "import salla; print(salla.version)"`
+`python3 -c "import salla; print(salla.version_info())"`
 
 
 ```
