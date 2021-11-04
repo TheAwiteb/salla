@@ -312,13 +312,6 @@ class Product(BaseModel):
         else:
             raise SaveProductErorr(message="No changes have been made to the product.")
 
-    def delete(self) -> None:
-        """
-        مسح المنتج
-        """
-        # TODO: بعد الحذف pagination تعديل الـ
-        apihelper.delete_product(self.id)
-
     @validator("updated_at", "pinned_date", "sale_end", pre=True)
     @classmethod
     def parse_date(cls, date: str) -> datetime:
@@ -467,3 +460,24 @@ class ProductList(ListHelper, BaseModel):
                 raise PaginationError(message=f"Invalid page number, {page_number}.")
         else:
             raise TypeError
+
+    def delete(self, product: Union[str, Product]) -> None:
+        """مسح المنتج
+
+        المتغيرات:
+            product (Union[str, Product]): المنتج المراد مسحه او الايدي الخاص به
+        """
+        apihelper.delete_product(product.id if type(product) is Product else product)
+        if product := list(
+            filter(
+                lambda product_: (product_.id == product.id)
+                if type(product) is Product
+                else (product_.id == product),
+                self.products,
+            )
+        ):
+            self.products.remove(product[0])
+
+        if len(self.products) == 0:
+            if self.have_previous():
+                self.previous()
