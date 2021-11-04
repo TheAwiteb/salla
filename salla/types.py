@@ -2,7 +2,7 @@
 ## لماذا الاغلب لانه فيه تايب تكون كبيرة، المنتج مثلا ماينفع نحطه مع التايبس الصغيرة
 
 from pydantic import BaseModel, validator, HttpUrl, Field
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
 import salla
 from salla.validators import choice_validator, date_parser
@@ -473,3 +473,89 @@ class Store(BaseModel):
             datetime: التاريخ بعد تحويله
         """
         return date_parser(cls, date)
+
+
+class ListHelper:
+    """
+    كلاس مساعد لادارة مصفوفة داخل كلاس
+
+    تنويه:
+        يجب ان يكون الكلاس هو اول كلاس ترث منه
+
+    مثال:
+        class Foo(ListHelper, Another)
+    """
+
+    def __init__(self, **kwargs):
+        """
+        يجب عليك تمرير المصفوفة مثل بالاسفل لكي يتمكن الكلاس من الوصول لها
+        ListHelper.__init__(self, lst_name=lst_name)
+        """
+        self.list_name = list(kwargs.keys())[0]
+        """ اسم المصفوفة """
+
+    def first(self) -> Any:
+        """ارجاع اول عنصر في المصفوفة
+
+        المخرجات:
+            Any: العنصر
+        """
+        return self.__dict__.get(self.list_name)[0]
+
+    def last(self) -> Any:
+        """ارجاع اخر عنصر في المصفوفة
+
+        المخرجات:
+            Any: العنصر
+        """
+        return self.__dict__.get(self.list_name)[-1]
+
+    def __iter__(self):
+        return self.__dict__.get(self.list_name).__iter__()
+
+    def __len__(self) -> int:
+        """ارجاع عدد العنصرات التي في المصفوفة
+
+        المخرجات:
+            int: عدد العنصرات
+        """
+        return len(self.__dict__.get(self.list_name))
+
+    def __eq__(self, other) -> bool:
+        """ارجاع صحيح اذا تطابقت المصفوفة مع المصفوفة المعطاء
+
+        المتغيرات:
+            other: اوبجكت المصفوفة المراد التحقق من عنصراتها
+
+        الاخطاء:
+            TypeError: المصفوفة المعطاء ليست نفس كلاس المصفوفة الموجودة
+
+        المخرجات:
+            bool: صحيح اذا كانت متطابقة
+        """
+        if type(other) == self.__class__:
+            return len(self.__dict__.get(self.list_name)) == len(
+                other.__dict__.get(other.list_name)
+            ) and all(
+                elm == other_elm
+                for elm, other_elm in zip(
+                    self.__dict__.get(self.list_name),
+                    other.__dict__.get(other.list_name),
+                )
+            )
+        else:
+            raise TypeError
+
+    def __getitem__(self, index: int) -> Any:
+        """جلب عنصر من المصفوفة
+
+        المتغيرات:
+            index (int): الاندكس
+
+        الاخطاء:
+            IndexError: الاندكس ليس موجود في المصفوفة (اكبر من حجمها)
+
+        المخرجات:
+            Any: العنصر بحسب الاندكس اعلاه
+        """
+        return self.__dict__.get(self.list_name).__getitem__(index)
