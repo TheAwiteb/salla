@@ -2,7 +2,7 @@
 ## لماذا الاغلب لانه فيه تايب تكون كبيرة، المنتج مثلا ماينفع نحطه مع التايبس الصغيرة
 
 from pydantic import BaseModel, validator, HttpUrl, Field
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Union
 from datetime import datetime
 import salla
 from salla.validators import choice_validator, date_parser
@@ -103,9 +103,6 @@ class Image(BaseModel):
 
     default: Optional[bool]
     """ الصورة هي الصورة الافتراضية للمنتج """
-
-    def delete(self) -> None:
-        apihelper.delete_image(self.id)
 
     @validator("type")
     @classmethod
@@ -575,3 +572,20 @@ class ImageList(ListHelper, BaseModel):
     def __init__(self, **kwargs) -> None:
         BaseModel.__init__(self, **kwargs)
         ListHelper.__init__(self, images=self.images)
+
+    def delete(self, image: Union[int, Image]) -> None:
+        """مسح الميدياء عبر تمرير الايدي او الاوبجكت المراد مسحه
+
+        المتغيرات:
+            image (Union[str, Image]): الميدياء المراد مسحه او الايدي الخاص بها
+        """
+        apihelper.delete_image(image.id if type(image) is Image else image)
+        if image := list(
+            filter(
+                lambda image_: (image_.id == image.id)
+                if type(image) is Image
+                else (image_.id == image),
+                self.images,
+            )
+        ):
+            self.images.remove(image[0])
