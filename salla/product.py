@@ -11,6 +11,7 @@ from salla.types import (
     Rating,
     Brand,
     Image,
+    ImageList,
     Option,
     Skus,
     Categories,
@@ -112,7 +113,7 @@ class Product(BaseModel):
     url: str
     """ رابط المنتج """
 
-    images: List[Image]
+    images: Optional[ImageList]
     """ الصور والفديوهات الخاصة بالمنتج """
 
     sold_quantity: int
@@ -160,7 +161,7 @@ class Product(BaseModel):
     brand: Optional[Brand]
     """ العلامة التجارية الخاصة بالمنتج """
 
-    def __init__(self, skus: list, options: list, **kwargs):
+    def __init__(self, skus: list, options: list, images: list, **kwargs):
         """
         options في الـ value الخاصة بكل skus تم انشاء دالة التهيئة هاذيه لكي يتم اسناد فيم ال
         ومن اجل تعيين بعض القيمة الافتراضية
@@ -169,6 +170,7 @@ class Product(BaseModel):
             skus (list): الخاص بجميع القيم skus الـ
             options (list):  خيارات المنتج مثل الالوان والمقاسات
         """
+        images = ImageList(images=images)
         skus: List[Skus] = [Skus(**skus_) for skus_ in skus]
         options: List[Option] = [Option(**option) for option in options]
         for option in options:
@@ -182,7 +184,7 @@ class Product(BaseModel):
                     )
                     else skus_[0]
                 )
-        kwargs.update(options=options)
+        kwargs.update(options=options, images=images)
         super(Product, self).__init__(**kwargs)
         self.previous_dict: dict = self.dict().copy()
 
