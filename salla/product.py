@@ -294,7 +294,7 @@ class Product(BaseModel):
         data = {}
         data.update(video_url=youtube_video_url, default=default, alt=alt, sort=sort)
         image = Image(**apihelper.attach_youtube_video(product_id=self.id, json=data))
-        self.images.append(image)
+        self.images.images.append(image)
 
     def save(self):
         """
