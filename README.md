@@ -524,7 +524,7 @@ store = Salla(token="TOKEN", enable_logging=False)
 
 -->
 - [x] (1) تحويل المصفوفات الى اوبجكت يحتويها، تساعد في مسح العناصر التي بداخلها من المصفوفة والمتجر. [#4](https://github.com/TheAwiteb/salla/pull/4)
-- [ ] (2) ازالة الاكواد المكررة من دوال المسح في الـ [`apihelper.py`](salla/apihelper.py) وجعلها دالة واحدة.
+- [x] (2) ازالة الاكواد المكررة من دوال المسح في الـ [`apihelper.py`](salla/apihelper.py) وجعلها دالة واحدة. [#6](https://github.com/TheAwiteb/salla/pull/6)
 - [x] (3) تفعيل التسجيلات [logging](https://en.wikipedia.org/wiki/Logging_(software)). تم الانتها: [#5](https://github.com/TheAwiteb/salla/pull/5)
 - [ ] (4) انشاء ومسح وتعديل اختيارات المنتج.
 - [ ] (5) اعادة كتابة الاختبارات وربطها مع المتجر (تجرى الاختبارات على المتجر).
