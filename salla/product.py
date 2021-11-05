@@ -463,13 +463,22 @@ class ProductList(ListHelper, BaseModel):
         else:
             raise TypeError
 
-    def delete(self, product: Union[str, Product]) -> None:
+    @classmethod
+    def delete_(cls, product: Union[str, Product]) -> None:
         """مسح المنتج
 
         المتغيرات:
             product (Union[str, Product]): المنتج المراد مسحه او الايدي الخاص به
         """
         apihelper.delete_product(product.id if type(product) is Product else product)
+
+    def delete(self, product: Union[str, Product]) -> None:
+        """مسح المنتج
+
+        المتغيرات:
+            product (Union[str, Product]): المنتج المراد مسحه او الايدي الخاص به
+        """
+        self.__class__.delete_(product)
         if product := list(
             filter(
                 lambda product_: (product_.id == product.id)
