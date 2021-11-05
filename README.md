@@ -390,11 +390,22 @@ from salla import Salla
 
 store = Salla(token="TOKEN")
 
+# جلب المنتجات
+products = store.products()
+
 # جلب المنتج المراد مسحه
-product = store.products().first()
+product = products.last()
 
-product.delete()
+products.delete(product)  # or products.delete(product.id)
 
+# او
+
+from salla.product import ProductList
+
+# جلب المنتج المراد مسحه
+product = products.last()
+
+ProductList.delete_(product)  # or ProductList.delete_(product.id)
 ```
 
 <div dir="rtl">
@@ -416,9 +427,18 @@ store = Salla(token="TOKEN")
 product = store.products().first()
 
 # جلب الصورة المراد مسحها
-image = product.images[0]
+image = product.images.first()
 
-image.delete()
+product.images.delete(image)  # or product.images.delete(image.id)
+
+# او
+
+from salla.types import ImageList
+
+# جلب الصورة المراد مسحها
+image = product.images.first()
+
+ImageList.delete_(image)  # or ImageList.delete_(image.id)
 
 ```
 
@@ -484,7 +504,7 @@ product.get_changed_values()
 - [x] () ... 
 
 -->
-- [ ] (1) تحويل المصفوفات الى اوبجكت يحتويها، تساعد في مسح العناصر التي بداخلها من المصفوفة والمتجر.
+- [x] (1) تحويل المصفوفات الى اوبجكت يحتويها، تساعد في مسح العناصر التي بداخلها من المصفوفة والمتجر.
 - [ ] (2) ازالة الاكواد المكررة من دوال المسح في الـ [`apihelper.py`](salla/apihelper.py) وجعلها دالة واحدة.
 - [ ] (3) تفعيل الاحداث [logging](https://en.wikipedia.org/wiki/Logging_(software)).
 - [ ] (4) انشاء ومسح وتعديل اختيارات المنتج.
