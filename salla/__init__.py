@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from typing import Optional
 from os import getenv
+import logging
+import sys
 import salla.exceptions
 import salla.product
 import salla.version
@@ -16,6 +18,24 @@ version = salla.version.__version__
 SALLA_URL = "https://salla.sa/"
 """ الرابط الخاص بموقع سلة """
 
+enable_logging = True
+""" حالة التسجيلات """
+
+file_handler = logging.FileHandler(filename="logging.log")
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.ERROR)
+handlers = [file_handler, stdout_handler]
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s (%(filename)s:%(lineno)d) %(levelname)s - %(name)s: "%(message)s"',
+    handlers=handlers,
+)
+
+
+logger = logging.getLogger("salla")
+""" مسجل التسجيلات """
+
 
 class Salla(BaseModel):
     """
@@ -30,17 +50,18 @@ class Salla(BaseModel):
     """ التوكن الخاص بالمتجر"""
 
     enable_logging: Optional[bool]
-    """ تسجيل الاحداث """
-
-    logging_filename: Optional[str]
-    """ اسم ملف الاحداث """
+    """ تسجيل التسجيلات """
 
     details: Optional[salla.types.Store]
     """ تفاصيل المتجر """
 
     def __init__(
-        self, token, enable_logging: bool = True, logging_filename: str = "logging.log"
+        self,
+        token,
+        enable_logging: bool = True,
     ) -> None:
+
+        salla.enable_logging = enable_logging
 
         if token == "TOKEN":
             token = getenv("SALLA_TOKEN")
@@ -52,13 +73,15 @@ class Salla(BaseModel):
         super(Salla, self).__init__(
             token=token,
             enable_logging=enable_logging,
-            logging_filename=logging_filename,
         )
         salla.apihelper.apihelper.token = token
-        salla.apihelper.apihelper.enable_logging = enable_logging
-        salla.apihelper.apihelper.logging_filename = logging_filename
 
         self.details = salla.apihelper.apihelper.store_details()
+        print(
+            f"Store: {self.details.username}-{self.details.name}\nurl: {self.details.url}\nPlan: {self.details.plan.capitalize()}",
+            version_info(),
+            sep="\n",
+        )
 
     def products(
         self,

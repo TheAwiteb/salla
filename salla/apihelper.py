@@ -2,6 +2,7 @@ import requests
 from pydantic import BaseModel
 from typing import Optional, Union
 from salla.exceptions import APIError, RateLimitError, AuthorizationError
+import salla
 
 
 class ErrorResponse(BaseModel):
@@ -39,12 +40,6 @@ class ApiHelper(BaseModel):
 
     token: Optional[str]
     """ التوكن الخاص بالمتجر """
-
-    enable_logging: Optional[bool] = True
-    """ تفعيل ملف تسجيل الاحداث ام لا """
-
-    logging_filename: Optional[str] = "logging.log"
-    """ اسم ملف تسجيل الاحداث """
 
     ratelimit_limit: Optional[int]
     """ اجمالي عدد الطلبات المسموح للمتجر """
@@ -91,6 +86,10 @@ class ApiHelper(BaseModel):
 
         url = self.api.format(method=method_name.strip("/"))
 
+        salla.logger.debug(
+            f"request '{method}' {method_name} {kwargs}"
+        ) if salla.enable_logging else None
+
         if (method := method.upper()) == "GET":
             request = requests.get
         elif method == "POST":
@@ -100,7 +99,9 @@ class ApiHelper(BaseModel):
         elif method == "DELETE":
             request = requests.delete
         else:
-            raise Exception(f"Invalid method '{method}' unknown method.")
+            error_message = f"Invalid method '{method}' unknown method."
+            salla.logger.error(error_message) if salla.enable_logging else None
+            raise Exception(error_message)
 
         response = request(url, headers=self.header, **kwargs)
 
@@ -109,8 +110,14 @@ class ApiHelper(BaseModel):
             self.ratelimit_limit = response.headers.get(
                 "x-ratelimit-limit", self.ratelimit_limit
             )
+            salla.logger.debug(
+                f"Successful request, ratelimit remaining: {self.ratelimit_remaining} ratelimit limit: {self.ratelimit_limit}"
+            ) if salla.enable_logging else None
             return response_json
         else:
+            salla.logger.debug(
+                f"Unsuccessful request, ratelimit remaining: {self.ratelimit_remaining} ratelimit limit: {self.ratelimit_limit}"
+            ) if salla.enable_logging else None
             self.error_handler(ErrorResponse(**response_json))
 
     def error_handler(self, error: ErrorResponse) -> None:
@@ -125,6 +132,9 @@ class ApiHelper(BaseModel):
             APIError: API خطأ من ال
         """
         message = error.error.message
+        salla.logger.error(
+            f"Code: {error.error.code}, status: {error.status}, message:{message}"
+        ) if salla.enable_logging else None
         if error.error.code == "Unauthorized":
             raise AuthorizationError
         elif error.status == 429:
