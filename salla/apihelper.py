@@ -206,6 +206,15 @@ class ApiHelper(BaseModel):
         method = "PUT"
         return self.make_request(method_name, method, json=update_dict)
 
+    def __delete(self, method_name: str) -> None:
+        """مسح عبر اسم الميثود
+
+        المتغيرات:
+            method_name (str): الميثود المراد المسح منها
+        """
+        method = "DELETE"
+        self.make_request(method_name, method)
+
     def delete_product(self, product_id: str) -> None:
         """مسح المنتج
 
@@ -213,8 +222,16 @@ class ApiHelper(BaseModel):
             product_id (str): ايدي المنتج المراد مسحه
         """
         method_name = f"products/{product_id}"
-        method = "DELETE"
-        self.make_request(method_name, method)
+        self.__delete(method_name)
+
+    def delete_image(self, image_id: int) -> None:
+        """مسخ الصورة الخاصة بالمنتج
+
+        المتغيرات:
+            image_id (int): ايدي الصورة المراد حذفها
+        """
+        method_name = f"products/images/{image_id}"
+        self.__delete(method_name)
 
     def store_details(self) -> dict:
         """ارجاع تفاصيل المتجر
@@ -244,16 +261,6 @@ class ApiHelper(BaseModel):
         response_dict["sort"] = response_dict.get("sort") or 0
         response_dict.update(url=response_dict["image"]["original"].get("url"))
         return response_dict
-
-    def delete_image(self, image_id: int) -> None:
-        """مسخ الصورة الخاصة بالمنتج
-
-        المتغيرات:
-            image_id (int): ايدي الصورة المراد حذفها
-        """
-        method_name = f"products/images/{image_id}"
-        method = "DELETE"
-        self.make_request(method_name, method)
 
 
 apihelper = ApiHelper()
