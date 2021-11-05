@@ -492,3 +492,5 @@ class ProductList(ListHelper, BaseModel):
         if len(self.products) == 0:
             if self.have_previous():
                 self.previous()
+            elif self.have_next():
+                self.next()
