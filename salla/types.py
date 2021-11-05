@@ -573,13 +573,22 @@ class ImageList(ListHelper, BaseModel):
         BaseModel.__init__(self, **kwargs)
         ListHelper.__init__(self, images=self.images)
 
-    def delete(self, image: Union[int, Image]) -> None:
+    @classmethod
+    def delete_(cls, image: Union[int, Image]) -> None:
         """مسح الميدياء عبر تمرير الايدي او الاوبجكت المراد مسحه
 
         المتغيرات:
             image (Union[str, Image]): الميدياء المراد مسحه او الايدي الخاص بها
         """
         apihelper.delete_image(image.id if type(image) is Image else image)
+
+    def delete(self, image: Union[int, Image]) -> None:
+        """مسح الميدياء عبر تمرير الايدي او الاوبجكت المراد مسحه
+
+        المتغيرات:
+            image (Union[str, Image]): الميدياء المراد مسحه او الايدي الخاص بها
+        """
+        self.__class__.delete_(image)
         if image := list(
             filter(
                 lambda image_: (image_.id == image.id)
