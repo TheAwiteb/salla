@@ -11,10 +11,12 @@ from salla.types import (
     Rating,
     Brand,
     Image,
+    ImageList,
     Option,
     Skus,
     Categories,
     Pagination,
+    ListHelper,
 )
 
 
@@ -111,7 +113,7 @@ class Product(BaseModel):
     url: str
     """ رابط المنتج """
 
-    images: List[Image]
+    images: Optional[ImageList]
     """ الصور والفديوهات الخاصة بالمنتج """
 
     sold_quantity: int
@@ -159,7 +161,7 @@ class Product(BaseModel):
     brand: Optional[Brand]
     """ العلامة التجارية الخاصة بالمنتج """
 
-    def __init__(self, skus: list, options: list, **kwargs):
+    def __init__(self, skus: list, options: list, images: list, **kwargs):
         """
         options في الـ value الخاصة بكل skus تم انشاء دالة التهيئة هاذيه لكي يتم اسناد فيم ال
         ومن اجل تعيين بعض القيمة الافتراضية
@@ -168,6 +170,7 @@ class Product(BaseModel):
             skus (list): الخاص بجميع القيم skus الـ
             options (list):  خيارات المنتج مثل الالوان والمقاسات
         """
+        images = ImageList(images=images)
         skus: List[Skus] = [Skus(**skus_) for skus_ in skus]
         options: List[Option] = [Option(**option) for option in options]
         for option in options:
@@ -181,7 +184,7 @@ class Product(BaseModel):
                     )
                     else skus_[0]
                 )
-        kwargs.update(options=options)
+        kwargs.update(options=options, images=images)
         super(Product, self).__init__(**kwargs)
         self.previous_dict: dict = self.dict().copy()
 
@@ -291,7 +294,7 @@ class Product(BaseModel):
         data = {}
         data.update(video_url=youtube_video_url, default=default, alt=alt, sort=sort)
         image = Image(**apihelper.attach_youtube_video(product_id=self.id, json=data))
-        self.images.append(image)
+        self.images.images.append(image)
 
     def save(self):
         """
@@ -310,13 +313,6 @@ class Product(BaseModel):
             self.previous_dict = self.dict().copy()
         else:
             raise SaveProductErorr(message="No changes have been made to the product.")
-
-    def delete(self) -> None:
-        """
-        مسح المنتج
-        """
-        # TODO: بعد الحذف pagination تعديل الـ
-        apihelper.delete_product(self.id)
 
     @validator("updated_at", "pinned_date", "sale_end", pre=True)
     @classmethod
@@ -378,7 +374,7 @@ class Product(BaseModel):
         )
 
 
-class ProductList(BaseModel):
+class ProductList(ListHelper, BaseModel):
     """
     كلاس يحتوي مصفوفة المنتجات، ويمكنك من خلاله التحكم بالصفحات
     """
@@ -388,6 +384,13 @@ class ProductList(BaseModel):
 
     pagination: Pagination
     """ ترقيم الصفحات """
+
+    list_name: Optional[str]
+    """ اسم المصفوفة التي تحتوي المنتجات """
+
+    def __init__(self, **kwargs) -> None:
+        BaseModel.__init__(self, **kwargs)
+        ListHelper.__init__(self, products=self.products)
 
     def have_next(self) -> bool:
         """ارجاع قيمة صحيحة اذ وجد صفحة تالية
@@ -460,66 +463,34 @@ class ProductList(BaseModel):
         else:
             raise TypeError
 
-    def first(self) -> Product:
-        """ارجاع اول منتج في المصفوفة
-
-        المخرجات:
-            Product: المنتج
-        """
-        return self.__getitem__(0)
-
-    def last(self) -> Product:
-        """ارجاع اخر منتج في المصفوفة
-
-        المخرجات:
-            Product: المنتج
-        """
-        return self.__getitem__(-1)
-
-    def __iter__(self):
-        return self.products.__iter__()
-
-    def __next__(self):
-        return self.products.__next__()
-
-    def __len__(self) -> int:
-        """ارجاع عدد المنتجات التي في المصفوفة
-
-        المخرجات:
-            int: عدد المنتجات
-        """
-        return self.products.__len__()
-
-    def __eq__(self, other: "ProductList") -> bool:
-        """ارجاع صحيح اذا تطابقت المصفوفة مع المصفوفة المعطاء
+    @classmethod
+    def delete_(cls, product: Union[str, Product]) -> None:
+        """مسح المنتج
 
         المتغيرات:
-            other (ProductList): المصفوفة المراد التحقق من منتجاتها
-
-        الاخطاء:
-            TypeError: نوع غير صحيح
-
-        المخرجات:
-            bool: صحيح اذا كانت متطابقة
+            product (Union[str, Product]): المنتج المراد مسحه او الايدي الخاص به
         """
-        if type(other) == ProductList:
-            return all(
-                product == other_product
-                for product, other_product in zip(self.products, other.products)
+        apihelper.delete_product(product.id if type(product) is Product else product)
+
+    def delete(self, product: Union[str, Product]) -> None:
+        """مسح المنتج
+
+        المتغيرات:
+            product (Union[str, Product]): المنتج المراد مسحه او الايدي الخاص به
+        """
+        self.__class__.delete_(product)
+        if product := list(
+            filter(
+                lambda product_: (product_.id == product.id)
+                if type(product) is Product
+                else (product_.id == product),
+                self.products,
             )
-        else:
-            raise TypeError
+        ):
+            self.products.remove(product[0])
 
-    def __getitem__(self, index: int) -> Product:
-        """جلب عنصر من المصفوفة
-
-        المتغيرات:
-            index (int): الاندكس
-
-        الاخطاء:
-            IndexError: الاندكس ليس موجود في المصفوفة (اكبر من حجمها)
-
-        المخرجات:
-            Product: المنتج بحسب الاندكس اعلاه
-        """
-        return self.products.__getitem__(index)
+        if len(self.products) == 0:
+            if self.have_previous():
+                self.previous()
+            elif self.have_next():
+                self.next()

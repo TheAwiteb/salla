@@ -202,7 +202,6 @@ class ApiHelper(BaseModel):
         المتغيرات:
             product_id (str): ايدي المنتج المراد مسحه
         """
-        # TODO: الجديد بعد الحذف pagination ارجاع الـ
         method_name = f"products/{product_id}"
         method = "DELETE"
         self.make_request(method_name, method)
@@ -242,7 +241,6 @@ class ApiHelper(BaseModel):
         المتغيرات:
             image_id (int): ايدي الصورة المراد حذفها
         """
-        # TODO: مسح الصورة من المصفوفة التي تحتوي الصورة (في المنتج)
         method_name = f"products/images/{image_id}"
         method = "DELETE"
         self.make_request(method_name, method)
