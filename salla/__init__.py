@@ -9,6 +9,9 @@ import salla.version
 import salla.apihelper
 import salla.types
 import salla.validators
+import salla.util
+
+from salla import util
 
 version_info = salla.version.version_info
 
