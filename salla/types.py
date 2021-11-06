@@ -623,6 +623,39 @@ class OptionList(ListHelper, BaseModel):
         """
         apihelper.delete_option(option.id if type(option) is Option else option)
 
+    @classmethod
+    def create_(
+        cls,
+        product_id: str,
+        name: str,
+        values: List[Value],
+        display_type: Optional[str] = None,
+    ) -> Option:
+        """انشاء اختيار للمنتج
+
+        المتغيرات:
+            product_id (str): ايدي المنتج المراد اضافة الاختيار له
+            name (str): اسم الاختيار
+            values (List[Value]): القيم الخاصة بالاختيار
+            display_type (Optional[str], optional): نوع الاختيار ( text - image - color). Defaults to None.
+
+        المخرجات:
+            Option: الاختيار الذي تم انشائه
+        """
+        data = {
+            "name": name,
+            "display_type": display_type,
+            "values": [
+                {
+                    "name": value.name,
+                    "price": value.price.amount,
+                    "display_value": value.display_value,
+                }
+                for value in values
+            ],
+        }
+        return Option(**apihelper.create_option(product_id, data).get("data"))
+
     def delete(self, option: Union[int, Option]) -> None:
         """مسح الاختيار عبر تمرير الايدي او الاوبجكت المراد مسحه
 
@@ -639,3 +672,28 @@ class OptionList(ListHelper, BaseModel):
             )
         ):
             self.options.remove(option[0])
+
+    def create(
+        self,
+        product_id: str,
+        name: str,
+        values: List[Value],
+        display_type: Optional[str] = None,
+    ) -> Option:
+        """انشاء اختيار للمنتج
+
+        المتغيرات:
+            product_id (str): ايدي المنتج المراد اضافة الاختيار له
+            name (str): اسم الاختيار
+            values (List[Value]): القيم الخاصة بالاختيار
+            display_type (Optional[str], optional): نوع الاختيار ( text - image - color). Defaults to None.
+
+        المخرجات:
+            Option: الاختيار الذي تم انشائه
+        """
+        kwargs = {
+            key: val for key, val in locals().items() if key not in ["kwargs", "self"]
+        }
+        option = self.__class__.create_(**kwargs)
+        self.options.append(option)
+        return option

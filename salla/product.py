@@ -16,6 +16,7 @@ from salla.types import (
     Option,
     OptionList,
     Skus,
+    Value,
     Categories,
     Pagination,
     ListHelper,
@@ -291,6 +292,27 @@ class Product(BaseModel):
         data.update(video_url=youtube_video_url, default=default, alt=alt, sort=sort)
         image = Image(**apihelper.attach_youtube_video(product_id=self.id, json=data))
         self.images.images.append(image)
+
+    def create_option(
+        self,
+        name: str,
+        values: List[Value],
+        display_type: Optional[str] = None,
+    ) -> Option:
+        """انشاء اختيار للمنتج
+
+        المتغيرات:
+            name (str): اسم الاختيار
+            values (List[Value]): القيم الخاصة بالاختيار
+            display_type (Optional[str], optional): نوع الاختيار ( text - image - color). Defaults to None.
+
+        المخرجات:
+            Option: الاختيار الذي تم انشائه
+        """
+        kwargs = {
+            key: val for key, val in locals().items() if key not in ["kwargs", "self"]
+        }
+        return self.options.create(self.id, **kwargs)
 
     def save(self):
         """

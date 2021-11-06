@@ -167,6 +167,27 @@ class ApiHelper(BaseModel):
         }
         return params
 
+    def __delete(self, method_name: str) -> None:
+        """مسح عبر اسم الميثود
+
+        المتغيرات:
+            method_name (str): الميثود المراد المسح منها
+        """
+        method = "DELETE"
+        self.make_request(method_name, method)
+
+    def __create(self, method_name: str, **kwargs) -> dict:
+        """انشاء عبر اسم الميثود والمعطيات
+
+        المتغيرات:
+            method_name (str): الميثود المراد الانشاء منها
+
+        المخرجات:
+            dict: القاموس المرجع من الميثود
+        """
+        method = "POST"
+        return self.make_request(method_name, method, **kwargs)
+
     def products(self, params: dict) -> dict:
         """جلب المنتجات
 
@@ -206,15 +227,6 @@ class ApiHelper(BaseModel):
         method = "PUT"
         return self.make_request(method_name, method, json=update_dict)
 
-    def __delete(self, method_name: str) -> None:
-        """مسح عبر اسم الميثود
-
-        المتغيرات:
-            method_name (str): الميثود المراد المسح منها
-        """
-        method = "DELETE"
-        self.make_request(method_name, method)
-
     def delete_product(self, product_id: str) -> None:
         """مسح المنتج
 
@@ -241,6 +253,19 @@ class ApiHelper(BaseModel):
         """
         method_name = f"products/options/{option_id}"
         self.__delete(method_name)
+
+    def create_option(self, product_id: str, data: dict) -> dict:
+        """انشاء اختيار جديد في المنتج
+
+        المتغيرات:
+            product_id (str): ايدي المنتج المراد انشاء الاختيار له
+            data (dict): بيانات الاختيار
+
+        المخرجات:
+            dict: محتوى الاختيار
+        """
+        method_name = f"products/{product_id}/options"
+        return self.__create(method_name, json=data)
 
     def store_details(self) -> dict:
         """ارجاع تفاصيل المتجر
