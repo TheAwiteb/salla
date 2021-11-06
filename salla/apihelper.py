@@ -188,6 +188,18 @@ class ApiHelper(BaseModel):
         method = "POST"
         return self.make_request(method_name, method, **kwargs)
 
+    def __update(self, method_name: str, **kwargs) -> dict:
+        """تحديث عبر اسم الميثود والمعطيات
+
+        المتغيرات:
+            method_name (str): الميثود المراد التحديث منها
+
+        المخرجات:
+            dict: القاموس المرجع من الميثود
+        """
+        method = "PUT"
+        return self.make_request(method_name, method, **kwargs)
+
     def products(self, params: dict) -> dict:
         """جلب المنتجات
 
