@@ -4,6 +4,7 @@ from typing import Optional, Union, List, Any
 from salla.apihelper import apihelper
 from salla.exceptions import PaginationError, SaveProductErorr
 from salla.validators import date_parser, choice_validator
+from salla.util import add_skus_to_option
 from salla.types import (
     Promotion,
     Urls,
@@ -13,6 +14,7 @@ from salla.types import (
     Image,
     ImageList,
     Option,
+    OptionList,
     Skus,
     Categories,
     Pagination,
@@ -152,7 +154,7 @@ class Product(BaseModel):
     updated_at: datetime
     """ تاريخ اخر تعديل على المنتج"""
 
-    options: List[Option]
+    options: OptionList
     """ خيارات المنتج مثل الالوان والمقاسات """
 
     categories: List[Categories]
@@ -173,17 +175,11 @@ class Product(BaseModel):
         images = ImageList(images=images)
         skus: List[Skus] = [Skus(**skus_) for skus_ in skus]
         options: List[Option] = [Option(**option) for option in options]
+
         for option in options:
-            for value in option.values:
-                value.skus = (
-                    None
-                    if not (
-                        skus_ := [
-                            skus_ for skus_ in skus if value.id in skus_.related_options
-                        ]
-                    )
-                    else skus_[0]
-                )
+            option = add_skus_to_option(skus, option)
+
+        options: OptionList = OptionList(options=options)
         kwargs.update(options=options, images=images)
         super(Product, self).__init__(**kwargs)
         self.previous_dict: dict = self.dict().copy()

@@ -598,3 +598,44 @@ class ImageList(ListHelper, BaseModel):
             )
         ):
             self.images.remove(image[0])
+
+
+class OptionList(ListHelper, BaseModel):
+    """
+    كلاس يحتوي مصفوفة الاختيارات يمكنك من خلاله بسح وانشاء اختيار جديد
+    """
+
+    options: List[Option]
+    """ مصفوفة الاختيارات """
+
+    list_name: Optional[str]
+
+    def __init__(self, **kwargs) -> None:
+        BaseModel.__init__(self, **kwargs)
+        ListHelper.__init__(self, options=self.options)
+
+    @classmethod
+    def delete_(cls, option: Union[int, Option]) -> None:
+        """مسح الاختيار عبر تمرير الايدي او الاوبجكت المراد مسحه
+
+        المتغيرات:
+            option (Union[str, Option]): الاختيار المراد مسحه او الايدي الخاص به
+        """
+        apihelper.delete_option(option.id if type(option) is Option else option)
+
+    def delete(self, option: Union[int, Option]) -> None:
+        """مسح الاختيار عبر تمرير الايدي او الاوبجكت المراد مسحه
+
+        المتغيرات:
+            option (Union[str, Option]): الاختيار المراد مسحه او الايدي الخاص بها
+        """
+        self.__class__.delete_(option)
+        if option := list(
+            filter(
+                lambda option_: (option_.id == option.id)
+                if type(option) is Option
+                else (option_.id == option),
+                self.options,
+            )
+        ):
+            self.options.remove(option[0])
