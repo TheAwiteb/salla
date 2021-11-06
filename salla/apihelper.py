@@ -233,6 +233,15 @@ class ApiHelper(BaseModel):
         method_name = f"products/images/{image_id}"
         self.__delete(method_name)
 
+    def delete_option(self, option_id: str) -> None:
+        """مسح الاختيار عبر الايدي الخاص به
+
+        المتغيرات:
+            option_id (str): ايدي الاختيار المراد مسحه
+        """
+        method_name = f"products/options/{option_id}"
+        self.__delete(method_name)
+
     def store_details(self) -> dict:
         """ارجاع تفاصيل المتجر
 
