@@ -236,8 +236,7 @@ class ApiHelper(BaseModel):
             dict: المنتج بعد تعديله
         """
         method_name = f"products/{product_id}"
-        method = "PUT"
-        return self.make_request(method_name, method, json=update_dict)
+        return self.__update(method_name, json=update_dict)
 
     def delete_product(self, product_id: str) -> None:
         """مسح المنتج
