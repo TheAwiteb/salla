@@ -1,12 +1,14 @@
 ## في هذا الملف المهم سوف تتواجد اغلب التايبس الخاصة بسلة
 ## لماذا الاغلب لانه فيه تايب تكون كبيرة، المنتج مثلا ماينفع نحطه مع التايبس الصغيرة
 
+import salla
+from threading import Thread
 from pydantic import BaseModel, validator, HttpUrl, Field
 from typing import Optional, List, Any, Union
 from datetime import datetime
-import salla
 from salla.validators import choice_validator, date_parser
 from salla.apihelper import apihelper
+from salla import util
 
 
 class Promotion(BaseModel):
@@ -645,14 +647,7 @@ class OptionList(ListHelper, BaseModel):
         data = {
             "name": name,
             "display_type": display_type,
-            "values": [
-                {
-                    "name": value.name,
-                    "price": value.price.amount,
-                    "display_value": value.display_value,
-                }
-                for value in values
-            ],
+            "values": util.values2dict(values),
         }
         return Option(**apihelper.create_option(product_id, data).get("data"))
 
@@ -697,3 +692,58 @@ class OptionList(ListHelper, BaseModel):
         option = self.__class__.create_(**kwargs)
         self.options.append(option)
         return option
+
+    def __save(self, option: Option, data: dict) -> None:
+        """ميثود خاصة يتم تمرير لها الاختيار المراد تحديثه لكي يتم حفظ الاختيار بعد التعديل
+
+        المتغيرات:
+            option (Option): الاختيار المراد تحديثه
+            data (dict): البيانات الجديدة
+        """
+        option = Option(**apihelper.update_option(option.id, data).get("data"))
+
+    def _save(self, previous_options: List[dict]) -> List[Thread]:
+        """الخاصة بالمنتج save يتم استخدام هذه الميثود في ال
+        حفظ التغيرات التي حدثت على الاختيارات
+
+        المتغيرات:
+            previous_options (List[dict]): الاختيارات القديمة قبل التحديث
+
+        المخرجات:
+            List[Thread]: مصفوفة تحتوي الثريدس التي تم انشائها
+        """
+        threads = []
+        for option in self.options:
+            previous_option = list(
+                filter(
+                    lambda previous_option: option.id == previous_option.get("id"),
+                    previous_options,
+                )
+            )
+            if previous_option:
+                if option != (previous_option := previous_option[0]):
+                    previous_option: dict
+
+                    previous_option_values_id = list(
+                        map(
+                            lambda value: value.get("id"), previous_option.get("values")
+                        )
+                    )
+                    data = {
+                        "name": option.name,
+                        "display_type": option.display_type,
+                        "values": util.values2dict(
+                            list(
+                                filter(
+                                    lambda value: value.id
+                                    not in previous_option_values_id,
+                                    option.values,
+                                )
+                            )
+                        )
+                        or None,
+                    }
+                thread = Thread(target=self.__save, args=(option, data))
+                thread.start()
+                threads.append(thread)
+        return threads
