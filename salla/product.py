@@ -291,7 +291,9 @@ class Product(BaseModel):
         kwargs = {
             key: val for key, val in locals().items() if key not in ["kwargs", "self"]
         }
-        return self.options.create(self.id, **kwargs)
+        option = self.options.create(self.id, **kwargs)
+        self.previous_dict = self.dict().copy()
+        return option
 
     def __save(self) -> None:
         """
