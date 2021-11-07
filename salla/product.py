@@ -1,10 +1,11 @@
 from datetime import datetime
 from pydantic import BaseModel, validator
 from typing import Optional, Union, List, Any
+from threading import Thread
 from salla.apihelper import apihelper
 from salla.exceptions import PaginationError, SaveProductErorr
 from salla.validators import date_parser, choice_validator
-from salla.util import add_skus_to_option
+from salla import util
 from salla.types import (
     Promotion,
     Urls,
@@ -21,6 +22,37 @@ from salla.types import (
     Pagination,
     ListHelper,
 )
+
+update_product_keys = [
+    "name",
+    "price",
+    "status",
+    "quantity",
+    "unlimited_quantity",
+    "description",
+    "categories",
+    "min_amount_donating",
+    "max_amount_donating",
+    "sale_price",
+    "cost_price",
+    "sale_end",
+    "require_shipping",
+    "maximum_quantity_per_order",
+    "weight",
+    "sku",
+    "with_tax",
+    "hide_quantity",
+    "enable_upload_image",
+    "enable_note",
+    "pinned",
+    "active_advance",
+    "subtitle",
+    "promotion_title",
+    "metadata_title",
+    "metadata_description",
+    "brand_id",
+    "tags",
+]
 
 
 class Product(BaseModel):
@@ -178,7 +210,7 @@ class Product(BaseModel):
         options: List[Option] = [Option(**option) for option in options]
 
         for option in options:
-            option = add_skus_to_option(skus, option)
+            option = util.add_skus_to_option(skus, option)
 
         options: OptionList = OptionList(options=options)
         kwargs.update(options=options, images=images)
@@ -208,60 +240,7 @@ class Product(BaseModel):
         المخرجات:
             dict: القاموس الخاص بميثود تعديل المنتج
         """
-        update_product_keys = [
-            "name",
-            "price",
-            "status",
-            "quantity",
-            "unlimited_quantity",
-            "description",
-            "categories",
-            "min_amount_donating",
-            "max_amount_donating",
-            "sale_price",
-            "cost_price",
-            "sale_end",
-            "require_shipping",
-            "maximum_quantity_per_order",
-            "weight",
-            "sku",
-            "with_tax",
-            "hide_quantity",
-            "enable_upload_image",
-            "enable_note",
-            "pinned",
-            "active_advance",
-            "subtitle",
-            "promotion_title",
-            "metadata_title",
-            "metadata_description",
-            "brand_id",
-            "tags",
-        ]
-
-        def dict_parser(value: Any) -> Any:
-            """ارجاع المتغير بعد التعديل عليه او عدم التعديل اذ لم يلزم
-
-            المتغيرات:
-                value (Any): القمية المراد التعديل عليها ان لزم
-
-            المخرجات:
-                Any: القمية بعد التعديل عليها ان لزم
-            """
-            if type(value) is list:
-                return [elm.get("id") for elm in value]
-            elif type(value) is dict and "amount" in value:
-                return value.get("amount")
-            elif type(value) is datetime:
-                return value.strftime(self.date_format)
-            else:
-                return value
-
-        return {
-            key: dict_parser(val)
-            for key, val in self.dict().items()
-            if key in update_product_keys
-        }
+        return util.get_dict_of(update_product_keys, self.dict())
 
     def change_status(self, new_status: str) -> None:
         """تغير حالة المنتج
@@ -314,6 +293,13 @@ class Product(BaseModel):
         }
         return self.options.create(self.id, **kwargs)
 
+    def __save(self) -> None:
+        """
+        ميثود خاصة تقوم بحفظ التغيرات التي حدثت على المنتج
+        """
+        product_dict = self.get_update_product_dict()
+        self = Product(**apihelper.update_product(self.id, product_dict).get("data"))
+
     def save(self):
         """
         حفط التغيرات التي حدثت على المنتج
@@ -321,13 +307,18 @@ class Product(BaseModel):
         has_changed = self.get_changed_values()
 
         if has_changed:
-            if "status" in has_changed and len(has_changed) == 1:
-                self.change_status(self.status)
-            else:
-                product_dict = self.get_update_product_dict()
-                self = Product(
-                    **apihelper.update_product(self.id, product_dict).get("data")
+            threads = []
+            if "options" in has_changed:
+                threads.append(
+                    self.options._save(self.previous_dict.get("options").get("options"))
                 )
+            if any(key in update_product_keys for key in has_changed):
+                thread = Thread(target=self.__save)
+                thread.start()
+                threads.append(thread)
+
+            util.join_threads(threads)
+
             self.previous_dict = self.dict().copy()
         else:
             raise SaveProductErorr(message="No changes have been made to the product.")
