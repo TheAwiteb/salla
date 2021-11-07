@@ -1,12 +1,14 @@
 ## في هذا الملف المهم سوف تتواجد اغلب التايبس الخاصة بسلة
 ## لماذا الاغلب لانه فيه تايب تكون كبيرة، المنتج مثلا ماينفع نحطه مع التايبس الصغيرة
 
+import salla
+from threading import Thread
 from pydantic import BaseModel, validator, HttpUrl, Field
 from typing import Optional, List, Any, Union
 from datetime import datetime
-import salla
 from salla.validators import choice_validator, date_parser
 from salla.apihelper import apihelper
+from salla import util
 
 
 class Promotion(BaseModel):
@@ -598,3 +600,150 @@ class ImageList(ListHelper, BaseModel):
             )
         ):
             self.images.remove(image[0])
+
+
+class OptionList(ListHelper, BaseModel):
+    """
+    كلاس يحتوي مصفوفة الاختيارات يمكنك من خلاله بسح وانشاء اختيار جديد
+    """
+
+    options: List[Option]
+    """ مصفوفة الاختيارات """
+
+    list_name: Optional[str]
+
+    def __init__(self, **kwargs) -> None:
+        BaseModel.__init__(self, **kwargs)
+        ListHelper.__init__(self, options=self.options)
+
+    @classmethod
+    def delete_(cls, option: Union[int, Option]) -> None:
+        """مسح الاختيار عبر تمرير الايدي او الاوبجكت المراد مسحه
+
+        المتغيرات:
+            option (Union[str, Option]): الاختيار المراد مسحه او الايدي الخاص به
+        """
+        apihelper.delete_option(option.id if type(option) is Option else option)
+
+    @classmethod
+    def create_(
+        cls,
+        product_id: str,
+        name: str,
+        values: List[Value],
+        display_type: Optional[str] = None,
+    ) -> Option:
+        """انشاء اختيار للمنتج
+
+        المتغيرات:
+            product_id (str): ايدي المنتج المراد اضافة الاختيار له
+            name (str): اسم الاختيار
+            values (List[Value]): القيم الخاصة بالاختيار
+            display_type (Optional[str], optional): نوع الاختيار ( text - image - color). Defaults to None.
+
+        المخرجات:
+            Option: الاختيار الذي تم انشائه
+        """
+        data = {
+            "name": name,
+            "display_type": display_type,
+            "values": util.values2dict(values),
+        }
+        return Option(**apihelper.create_option(product_id, data).get("data"))
+
+    def delete(self, option: Union[int, Option]) -> None:
+        """مسح الاختيار عبر تمرير الايدي او الاوبجكت المراد مسحه
+
+        المتغيرات:
+            option (Union[str, Option]): الاختيار المراد مسحه او الايدي الخاص بها
+        """
+        self.__class__.delete_(option)
+        if option := list(
+            filter(
+                lambda option_: (option_.id == option.id)
+                if type(option) is Option
+                else (option_.id == option),
+                self.options,
+            )
+        ):
+            self.options.remove(option[0])
+
+    def create(
+        self,
+        product_id: str,
+        name: str,
+        values: List[Value],
+        display_type: Optional[str] = None,
+    ) -> Option:
+        """انشاء اختيار للمنتج
+
+        المتغيرات:
+            product_id (str): ايدي المنتج المراد اضافة الاختيار له
+            name (str): اسم الاختيار
+            values (List[Value]): القيم الخاصة بالاختيار
+            display_type (Optional[str], optional): نوع الاختيار ( text - image - color). Defaults to None.
+
+        المخرجات:
+            Option: الاختيار الذي تم انشائه
+        """
+        kwargs = {
+            key: val for key, val in locals().items() if key not in ["kwargs", "self"]
+        }
+        option = self.__class__.create_(**kwargs)
+        self.options.append(option)
+        return option
+
+    def __save(self, option: Option, data: dict) -> None:
+        """ميثود خاصة يتم تمرير لها الاختيار المراد تحديثه لكي يتم حفظ الاختيار بعد التعديل
+
+        المتغيرات:
+            option (Option): الاختيار المراد تحديثه
+            data (dict): البيانات الجديدة
+        """
+        option = Option(**apihelper.update_option(option.id, data).get("data"))
+
+    def _save(self, previous_options: List[dict]) -> List[Thread]:
+        """الخاصة بالمنتج save يتم استخدام هذه الميثود في ال
+        حفظ التغيرات التي حدثت على الاختيارات
+
+        المتغيرات:
+            previous_options (List[dict]): الاختيارات القديمة قبل التحديث
+
+        المخرجات:
+            List[Thread]: مصفوفة تحتوي الثريدس التي تم انشائها
+        """
+        threads = []
+        for option in self.options:
+            previous_option = list(
+                filter(
+                    lambda previous_option: option.id == previous_option.get("id"),
+                    previous_options,
+                )
+            )
+            if previous_option:
+                if option != (previous_option := previous_option[0]):
+                    previous_option: dict
+
+                    previous_option_values_id = list(
+                        map(
+                            lambda value: value.get("id"), previous_option.get("values")
+                        )
+                    )
+                    data = {
+                        "name": option.name,
+                        "display_type": option.display_type,
+                        "values": util.values2dict(
+                            list(
+                                filter(
+                                    lambda value: value.id
+                                    not in previous_option_values_id,
+                                    option.values,
+                                )
+                            )
+                        )
+                        or None,
+                    }
+                    thread = Thread(target=self.__save, args=(option, data))
+                    thread.start()
+                    threads.append(thread)
+        return threads

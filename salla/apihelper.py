@@ -167,6 +167,39 @@ class ApiHelper(BaseModel):
         }
         return params
 
+    def __delete(self, method_name: str) -> None:
+        """مسح عبر اسم الميثود
+
+        المتغيرات:
+            method_name (str): الميثود المراد المسح منها
+        """
+        method = "DELETE"
+        self.make_request(method_name, method)
+
+    def __create(self, method_name: str, **kwargs) -> dict:
+        """انشاء عبر اسم الميثود والمعطيات
+
+        المتغيرات:
+            method_name (str): الميثود المراد الانشاء منها
+
+        المخرجات:
+            dict: القاموس المرجع من الميثود
+        """
+        method = "POST"
+        return self.make_request(method_name, method, **kwargs)
+
+    def __update(self, method_name: str, **kwargs) -> dict:
+        """تحديث عبر اسم الميثود والمعطيات
+
+        المتغيرات:
+            method_name (str): الميثود المراد التحديث منها
+
+        المخرجات:
+            dict: القاموس المرجع من الميثود
+        """
+        method = "PUT"
+        return self.make_request(method_name, method, **kwargs)
+
     def products(self, params: dict) -> dict:
         """جلب المنتجات
 
@@ -203,17 +236,7 @@ class ApiHelper(BaseModel):
             dict: المنتج بعد تعديله
         """
         method_name = f"products/{product_id}"
-        method = "PUT"
-        return self.make_request(method_name, method, json=update_dict)
-
-    def __delete(self, method_name: str) -> None:
-        """مسح عبر اسم الميثود
-
-        المتغيرات:
-            method_name (str): الميثود المراد المسح منها
-        """
-        method = "DELETE"
-        self.make_request(method_name, method)
+        return self.__update(method_name, json=update_dict)
 
     def delete_product(self, product_id: str) -> None:
         """مسح المنتج
@@ -232,6 +255,41 @@ class ApiHelper(BaseModel):
         """
         method_name = f"products/images/{image_id}"
         self.__delete(method_name)
+
+    def delete_option(self, option_id: str) -> None:
+        """مسح الاختيار عبر الايدي الخاص به
+
+        المتغيرات:
+            option_id (str): ايدي الاختيار المراد مسحه
+        """
+        method_name = f"products/options/{option_id}"
+        self.__delete(method_name)
+
+    def create_option(self, product_id: str, data: dict) -> dict:
+        """انشاء اختيار جديد في المنتج
+
+        المتغيرات:
+            product_id (str): ايدي المنتج المراد انشاء الاختيار له
+            data (dict): بيانات الاختيار
+
+        المخرجات:
+            dict: محتوى الاختيار
+        """
+        method_name = f"products/{product_id}/options"
+        return self.__create(method_name, json=data)
+
+    def update_option(self, option_id: str, data: dict) -> dict:
+        """تحديث محتوى الاختيار
+
+        المتغيرات:
+            option_id (str): ايدي الاختيار المراد تحديثه
+            data (dict): المحتوى الجديد الخاص بالاختيار
+
+        المخرجات:
+            dict: الاختيار بعد تحديثه
+        """
+        method_name = f"products/options/{option_id}"
+        return self.__update(method_name, json=data)
 
     def store_details(self) -> dict:
         """ارجاع تفاصيل المتجر

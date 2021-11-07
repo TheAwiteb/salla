@@ -54,6 +54,9 @@
         * [تحديث المنتج](#تحديث-المنتج)
         * [مسح المنتج](#مسح-المنتج)
         * [مسح صورة المنتج](#مسح-صورة-المنتج)
+        * [انشاء اختيار](#انشاء-اختيار)
+        * [تحديث اختيار](#تحديث-اختيار)
+        * [مسح اختيار](#مسح-اختيار)
       * [التسجيل](#التسجيل)
 
   * [المزيد من الامثلة](#المزيد-من-الامثلة)
@@ -462,6 +465,83 @@ product.get_changed_values()
 ```
 <div dir="rtl">
 
+### [الرجوع للاعلى ⬆️](#المحتوى)
+
+##### انشاء اختيار
+لانشاء اختيار يتطلب منك تمرير الاسم والقيم الموجودة فيه (يجب ان تكون هناك قيمة واحدة على الاقل)
+</div>
+
+```python
+from salla import Salla
+
+store = Salla(token="TOKEN")
+
+# جلب المنتج المراد اضافة اختيار له
+product = store.products().first()
+
+# جلب القيمة المراد اضافتها الى الاختيار من اختيار سابق
+value = product.options.first().values[0]
+
+product.create_option(name="new option", values=[value])
+
+```
+<div dir="rtl">
+
+##### تحديث اختيار
+
+</div>
+
+```python
+from salla import Salla
+
+store = Salla(token="TOKEN")
+
+# جلب المنتج المراد تحديث اختياره
+product = store.products().first()
+
+# جلب الاختيار المراد تحدثيه
+option = product.options.last()
+
+option.name = "secret option name"
+
+# حفظ التغيرات
+product.save()
+
+```
+<div dir="rtl">
+
+##### مسح اختيار
+يمكنك لمسح الاختيار تمرير ايدي الاختيار او الاختيار الى ميثود المسح
+
+</div>
+
+
+```python
+from salla import Salla
+
+store = Salla(token="TOKEN")
+
+# جلب المنتج المراد مسح اختياره
+product = store.products().first()
+
+# جلب الاختيار المراد مسحه
+option = product.options.last()
+
+product.options.delete(option)  # or product.options.delete(option.id)
+
+# او
+
+from salla.types import OptionList
+
+# جلب الاختيار المراد مسحه
+option = product.options.last()
+
+OptionList.delete_(option)  # or OptionList.delete_(option.id)
+
+```
+
+<div dir="rtl">
+
 ## التسجيل
 التسجيلات تساعدك على تتبع سير المكتبة وهي مفعلة افتراضيا، سوف يتم توضيح طريقة اغلاقها بالاسفل
 
@@ -526,5 +606,5 @@ store = Salla(token="TOKEN", enable_logging=False)
 - [x] (1) تحويل المصفوفات الى اوبجكت يحتويها، تساعد في مسح العناصر التي بداخلها من المصفوفة والمتجر. [#4](https://github.com/TheAwiteb/salla/pull/4)
 - [x] (2) ازالة الاكواد المكررة من دوال المسح في الـ [`apihelper.py`](salla/apihelper.py) وجعلها دالة واحدة. [#6](https://github.com/TheAwiteb/salla/pull/6)
 - [x] (3) تفعيل التسجيلات [logging](https://en.wikipedia.org/wiki/Logging_(software)). تم الانتها: [#5](https://github.com/TheAwiteb/salla/pull/5)
-- [ ] (4) انشاء ومسح وتعديل اختيارات المنتج.
+- [x] (4) انشاء ومسح وتعديل اختيارات المنتج. [#7](https://github.com/TheAwiteb/salla/pull/7)
 - [ ] (5) اعادة كتابة الاختبارات وربطها مع المتجر (تجرى الاختبارات على المتجر).

@@ -9,6 +9,9 @@ import salla.version
 import salla.apihelper
 import salla.types
 import salla.validators
+import salla.util
+
+from salla import util
 
 version_info = salla.version.version_info
 
@@ -28,7 +31,7 @@ handlers = [file_handler, stdout_handler]
 
 logging.basicConfig(
     level=logging.DEBUG,
-    format='%(asctime)s (%(filename)s:%(lineno)d) %(levelname)s - %(name)s: "%(message)s"',
+    format='%(asctime)s (%(filename)s:%(lineno)d %(threadName)s) %(levelname)s - %(name)s: "%(message)s"',
     handlers=handlers,
 )
 
