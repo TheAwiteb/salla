@@ -743,7 +743,7 @@ class OptionList(ListHelper, BaseModel):
                         )
                         or None,
                     }
-                thread = Thread(target=self.__save, args=(option, data))
-                thread.start()
-                threads.append(thread)
+                    thread = Thread(target=self.__save, args=(option, data))
+                    thread.start()
+                    threads.append(thread)
         return threads
