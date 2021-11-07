@@ -278,6 +278,19 @@ class ApiHelper(BaseModel):
         method_name = f"products/{product_id}/options"
         return self.__create(method_name, json=data)
 
+    def update_option(self, option_id: str, data: dict) -> dict:
+        """تحديث محتوى الاختيار
+
+        المتغيرات:
+            option_id (str): ايدي الاختيار المراد تحديثه
+            data (dict): المحتوى الجديد الخاص بالاختيار
+
+        المخرجات:
+            dict: الاختيار بعد تحديثه
+        """
+        method_name = f"products/options/{option_id}"
+        return self.__update(method_name, json=data)
+
     def store_details(self) -> dict:
         """ارجاع تفاصيل المتجر
 
