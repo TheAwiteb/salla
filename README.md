@@ -53,7 +53,8 @@
         * [انشاء منتج - create_product](#انشاء-منتج---create-product)
         * [تحديث المنتج](#تحديث-المنتج)
         * [مسح المنتج](#مسح-المنتج)
-        * [مسح صورة المنتج](#مسح-صورة-المنتج)
+        * [اضافة فديو الى المنتج](#اضافة-فديو-الى-المنتج)
+        * [مسح صورة/فديو المنتج](#مسح-صورة/فديو-المنتج)
         * [انشاء اختيار](#انشاء-اختيار)
         * [تحديث اختيار](#تحديث-اختيار)
         * [مسح اختيار](#مسح-اختيار)
@@ -414,8 +415,30 @@ ProductList.delete_(product)  # or ProductList.delete_(product.id)
 
 <div dir="rtl">
 
-##### مسح صورة المنتج
-في المثال ادناه سوف يتم توضيح طريقة مسح صورة المنتج
+##### اضافة فديو الى المنتج
+يمكنك اضافة فديو يوتيوب الى المنتج بالطريقة التالية
+
+
+
+```python
+from salla import Salla
+
+store = Salla(token="TOKEN")
+
+# جلب المنتجات
+products = store.products()
+
+# جلب المنتج المراد اضافة فديو له
+product = products.last()
+
+product.attach_youtube_video(youtube_video_url="https://www.youtube.com/watch?v=FUKmyRLOlAA", default=True)
+
+```
+
+<div dir="rtl">
+
+##### مسح صورة/فديو المنتج
+في المثال ادناه سوف يتم توضيح طريقة مسح صورة/فديو المنتج
 
 ### [الرجوع للاعلى ⬆️](#المحتوى)
 
@@ -427,10 +450,10 @@ from salla import Salla
 
 store = Salla(token="TOKEN")
 
-# جلب المنتج المراد مسح صورته
+# جلب المنتج المراد مسح صورته/فديو
 product = store.products().first()
 
-# جلب الصورة المراد مسحها
+# جلب الصورة/الفديو المراد مسحها
 image = product.images.first()
 
 product.images.delete(image)  # or product.images.delete(image.id)
@@ -439,7 +462,7 @@ product.images.delete(image)  # or product.images.delete(image.id)
 
 from salla.types import ImageList
 
-# جلب الصورة المراد مسحها
+# جلب الصورة/الفديو المراد مسحها
 image = product.images.first()
 
 ImageList.delete_(image)  # or ImageList.delete_(image.id)
@@ -608,3 +631,5 @@ store = Salla(token="TOKEN", enable_logging=False)
 - [x] (3) تفعيل التسجيلات [logging](https://en.wikipedia.org/wiki/Logging_(software)). تم الانتها: [#5](https://github.com/TheAwiteb/salla/pull/5)
 - [x] (4) انشاء ومسح وتعديل اختيارات المنتج. [#7](https://github.com/TheAwiteb/salla/pull/7)
 - [ ] (5) اعادة كتابة الاختبارات وربطها مع المتجر (تجرى الاختبارات على المتجر).
+- [ ] (6) انشاء منتج وانشاء وتعديل ومسح القيم الخاصة بالاختيار
+- [ ] (7) عرض وانشاء وتعديل ومسح الفئات
