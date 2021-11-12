@@ -483,6 +483,155 @@ class ProductList(ListHelper, BaseModel):
         """
         apihelper.delete_product(product.id if type(product) is Product else product)
 
+    @classmethod
+    def create_(
+        cls,
+        name: str,
+        price: float,
+        product_type: str,
+        status: str = None,
+        quantity: int = None,
+        description: str = None,
+        categories: List[Union[Categories, int]] = None,
+        min_amount_donating: float = None,
+        max_amount_donating: float = None,
+        sale_price: float = None,
+        cost_price: float = None,
+        sale_end: datetime = None,
+        require_shipping: bool = None,
+        maximum_quantity_per_order: int = None,
+        weight: float = None,
+        sku: str = None,
+        hide_quantity: bool = None,
+        enable_upload_image: bool = None,
+        enable_note: bool = None,
+        pinned: bool = False,
+        active_advance: bool = None,
+        subtitle: str = None,
+        promotion_title: str = None,
+        metadata_title: str = None,
+        metadata_description: str = None,
+        brand_id: int = None,
+        tags: List[int] = None,
+    ) -> Product:
+        """انشاء منتج
+
+        المتغيرات:
+            name (str): اسم المنتج
+            price (float): سعر المنتج
+            product_type (str): نوع المنتج ("product", "service", "group_products", "codes", "digital", "food", "donating")
+            status (str, optional): حالة المنتج ("none", "sale", "out", "hidden", "deleted"). Defaults to None.
+            quantity (int, optional): كمية المنتج. Defaults to None.
+            description (str, optional): وصف المنتج. Defaults to None.
+            categories (List[Union[Categories, int]], optional): فئات المنتج. Defaults to None.
+            min_amount_donating (float, optional): اقل كمية للتبرع. Defaults to None.
+            max_amount_donating (float, optional): اعلى كمية للتبرع. Defaults to None.
+            sale_price (float, optional): سعر تخفيض المنتج. Defaults to None.
+            cost_price (float, optional): سعر تكلمفة المنتج. Defaults to None.
+            sale_end (datetime, optional): تاريخ نهاية الخصم. Defaults to None.
+            require_shipping (bool, optional): تحديد اذا كان المنتج يتطلب خصم ام لا. Defaults to None.
+            maximum_quantity_per_order (int, optional): اقصى كمية للمنتج لكل طلب. Defaults to None.
+            weight (float, optional): وزن المنتج. Defaults to None.
+            sku (str, optional): الخاص بالمنتج sku الـ . Defaults to None.
+            hide_quantity (bool, optional): اخفاء كمية المنتج. Defaults to None.
+            enable_upload_image (bool, optional): امكانية رفع الصور في المنتج. Defaults to None.
+            enable_note (bool, optional): امكانية كتابة ملاحظة بالمنتج. Defaults to None.
+            pinned (bool, optional): تثبيت المنتج. Defaults to False.
+            active_advance (bool, optional): تفاصيل المنتج المتقدمة نشطة أم لا. Defaults to None.
+            subtitle (str, optional): العنوان الفرعي. Defaults to None.
+            promotion_title (str, optional): عنوان الترويج. Defaults to None.
+            metadata_title (str, optional): اسم صفحة المنتج. Defaults to None.
+            metadata_description (str, optional): وصف المنتج في محركات البحث. Defaults to None.
+            brand_id (int, optional): البراند الخاص بالمنتج. Defaults to None.
+            tags (List[int], optional): مصفوفة تحتوي التاقات. Defaults to None.
+
+        المخرجات:
+            Product: المنتج بعد انشائه
+        """
+        kwargs = dict(locals())
+        kwargs.pop("cls")
+
+        return Product(**apihelper.create_product(data=kwargs).get("data"))
+
+    def create(
+        self,
+        name: str,
+        price: float,
+        product_type: str,
+        status: str = None,
+        quantity: int = None,
+        description: str = None,
+        categories: List[Union[Categories, int]] = None,
+        min_amount_donating: float = None,
+        max_amount_donating: float = None,
+        sale_price: float = None,
+        cost_price: float = None,
+        sale_end: datetime = None,
+        require_shipping: bool = None,
+        maximum_quantity_per_order: int = None,
+        weight: float = None,
+        sku: str = None,
+        hide_quantity: bool = None,
+        enable_upload_image: bool = None,
+        enable_note: bool = None,
+        pinned: bool = False,
+        active_advance: bool = None,
+        subtitle: str = None,
+        promotion_title: str = None,
+        metadata_title: str = None,
+        metadata_description: str = None,
+        brand_id: int = None,
+        tags: List[int] = None,
+    ) -> Product:
+        """انشاء منتج
+
+        المتغيرات:
+            name (str): اسم المنتج
+            price (float): سعر المنتج
+            product_type (str): نوع المنتج ("product", "service", "group_products", "codes", "digital", "food", "donating")
+            status (str, optional): حالة المنتج ("none", "sale", "out", "hidden", "deleted"). Defaults to None.
+            quantity (int, optional): كمية المنتج. Defaults to None.
+            description (str, optional): وصف المنتج. Defaults to None.
+            categories (List[Union[Categories, int]], optional): فئات المنتج. Defaults to None.
+            min_amount_donating (float, optional): اقل كمية للتبرع. Defaults to None.
+            max_amount_donating (float, optional): اعلى كمية للتبرع. Defaults to None.
+            sale_price (float, optional): سعر تخفيض المنتج. Defaults to None.
+            cost_price (float, optional): سعر تكلمفة المنتج. Defaults to None.
+            sale_end (datetime, optional): تاريخ نهاية الخصم. Defaults to None.
+            require_shipping (bool, optional): تحديد اذا كان المنتج يتطلب خصم ام لا. Defaults to None.
+            maximum_quantity_per_order (int, optional): اقصى كمية للمنتج لكل طلب. Defaults to None.
+            weight (float, optional): وزن المنتج. Defaults to None.
+            sku (str, optional): الخاص بالمنتج sku الـ . Defaults to None.
+            hide_quantity (bool, optional): اخفاء كمية المنتج. Defaults to None.
+            enable_upload_image (bool, optional): امكانية رفع الصور في المنتج. Defaults to None.
+            enable_note (bool, optional): امكانية كتابة ملاحظة بالمنتج. Defaults to None.
+            pinned (bool, optional): تثبيت المنتج. Defaults to False.
+            active_advance (bool, optional): تفاصيل المنتج المتقدمة نشطة أم لا. Defaults to None.
+            subtitle (str, optional): العنوان الفرعي. Defaults to None.
+            promotion_title (str, optional): عنوان الترويج. Defaults to None.
+            metadata_title (str, optional): اسم صفحة المنتج. Defaults to None.
+            metadata_description (str, optional): وصف المنتج في محركات البحث. Defaults to None.
+            brand_id (int, optional): البراند الخاص بالمنتج. Defaults to None.
+            tags (List[int], optional): مصفوفة تحتوي التاقات. Defaults to None.
+
+        المخرجات:
+            Product: المنتج بعد انشائه
+        """
+
+        kwargs = dict(locals())
+        kwargs.pop("self")
+
+        product = self.__class__.create_(**kwargs)
+        self.pagination.total += 1
+
+        if self.pagination.current_page == self.pagination.total_pages and (
+            len(self.products) <= self.pagination.per_page
+            or self.pagination.count == self.pagination.total
+        ):
+            self.pagination.count += 1
+            self.products.append(product)
+        return product
+
     def delete(self, product: Union[str, Product]) -> None:
         """مسح المنتج
 
@@ -490,6 +639,7 @@ class ProductList(ListHelper, BaseModel):
             product (Union[str, Product]): المنتج المراد مسحه او الايدي الخاص به
         """
         self.__class__.delete_(product)
+        self.pagination.total -= 1
         if product := list(
             filter(
                 lambda product_: (product_.id == product.id)
@@ -499,6 +649,13 @@ class ProductList(ListHelper, BaseModel):
             )
         ):
             self.products.remove(product[0])
+            self.pagination.count -= 1
+
+        if len(self.products) == 0:
+            if self.have_previous():
+                self.previous()
+            elif self.have_next():
+                self.next()
 
         if len(self.products) == 0:
             if self.have_previous():
