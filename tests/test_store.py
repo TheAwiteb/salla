@@ -4,7 +4,7 @@ from salla.types import Option, Value, Price, Image, ImageList
 from datetime import datetime, timedelta
 
 store = Salla(token="TOKEN")
-products = store.products(per_page=1)
+products = store.products()
 
 
 def must_be_error(func, *args, **kwargs) -> bool:
@@ -44,12 +44,43 @@ def test_product_list():
 
 
 def test_create_product():
-    # سيتم كتابتها بعد انشاء المنتج
-    pass
+    products_total = products.pagination.total
+    products_page_count = products.pagination.count
+
+    product = products.create(
+        name="new product",
+        price="50.39",
+        product_type="product",
+        status="sale",
+    )
+
+    assert product.id == products.last().id
+    assert products.pagination.total == products_total + 1
+    assert products.pagination.count == products_page_count + 1
+
+    new_product: Product = store.products().last()
+
+    assert product.id == new_product.id
+
+
+def test_attach_youtube_video():
+    product: Product = products.last()
+
+    url = "https://www.youtube.com/watch?v=FUKmyRLOlAA"
+
+    product.attach_youtube_video(url, default=True)
+
+    new_product: Product = store.products().last()
+    video: Image = product.images.last()
+    new_video: Image = new_product.images.last()
+
+    # assert type(video) is Image and type(new_video) is Image
+    assert video.video_url == url
+    assert new_video.video_url == url
 
 
 def test_update_product():
-    product: Product = products.first()
+    product: Product = products.last()
 
     product.name = "new product name"
     product.price.amount = 12
@@ -84,7 +115,7 @@ def test_update_product():
 
     assert must_be_error(product.save)
 
-    new_product: Product = store.products(per_page=1).first()
+    new_product: Product = store.products().last()
 
     assert new_product.name == "new product name"
     assert new_product.price.amount == 5  # تم تحديث سعر الخصم في الاعلى
@@ -94,7 +125,7 @@ def test_update_product():
     assert new_product.description == "new product description"
     assert new_product.sale_price.amount == 5
     assert new_product.cost_price == 8
-    assert new_product.sale_end < datetime.now() + timedelta(days=1)
+    assert new_product.sale_end > datetime.now()
     assert new_product.require_shipping == True
     assert new_product.weight == 10
     assert new_product.sku == "new product sku"
@@ -136,13 +167,8 @@ def test_update_product():
     assert must_be_error(product.save)
 
 
-def test_delete_product():
-    # سيتم كتابتها بعد انشاء المنتج
-    pass
-
-
 def test_create_option():
-    product: Product = products.first()
+    product: Product = products.last()
 
     price = Price(amount=0, currency="SAR")
 
@@ -162,14 +188,14 @@ def test_create_option():
         ],
     )
 
-    new_product: Product = store.products(per_page=1).first()
+    new_product: Product = store.products().last()
 
     assert product.options.last().id == option.id
     assert new_product.options.last().id == option.id
 
 
 def test_update_option():
-    product: Product = products.first()
+    product: Product = products.last()
 
     option: Option = product.options.last()
     option.name = "new option name"
@@ -181,7 +207,7 @@ def test_update_option():
 
     assert must_be_error(product.save)
 
-    new_product: Product = store.products(per_page=1).first()
+    new_product: Product = store.products().last()
 
     option: Option = new_product.options.last()
 
@@ -196,41 +222,42 @@ def test_update_option():
 
 
 def test_delete_option():
-    product: Product = products.first()
+    product: Product = products.last()
 
     option = product.options.last()
     product.options.delete(option)
 
-    new_product: Product = store.products(per_page=1).first()
+    new_product: Product = store.products().last()
 
     assert option not in product.options
     assert option not in new_product.options
 
 
-def test_attach_youtube_video():
-    product: Product = products.first()
-
-    url = "https://www.youtube.com/watch?v=FUKmyRLOlAA"
-
-    product.attach_youtube_video(url)
-
-    new_product: Product = store.products(per_page=1).first()
-    video: Image = product.images.last()
-    new_video: Image = new_product.images.last()
-
-    # assert type(video) is Image and type(new_video) is Image
-    assert video.video_url == url
-    assert new_video.video_url == url
-
-
 def test_delete_image():
-    product: Product = products.first()
+    product: Product = products.last()
     images = product.images
     image: Image = images.last()
 
     images.delete(image)
 
-    new_images: ImageList = store.products(per_page=1).first().images
+    new_images: ImageList = store.products().last().images
 
     assert image not in images
     assert image not in new_images
+
+
+def test_delete_product():
+    product: Product = products.last()
+
+    products_total = products.pagination.total
+    products_page_count = products.pagination.count
+
+    products.delete(product)
+
+    assert product.id != products.last().id
+    assert products.pagination.total == products_total - 1
+    assert products.pagination.count == products_page_count - 1
+
+    new_product: Product = store.products().last()
+
+    assert product.id != new_product.id
