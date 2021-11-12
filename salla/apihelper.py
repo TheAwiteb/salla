@@ -291,6 +291,18 @@ class ApiHelper(BaseModel):
         method_name = f"products/{product_id}/options"
         return self.__create(method_name, json=data)
 
+    def create_product(self, data: dict) -> dict:
+        """انشاء منتج
+
+        المتغيرات:
+            data (dict): بيانات المنتج المراد انشائه
+
+        المخرجات:
+            dict: المنتج بعد انشائه
+        """
+        method_name = "products"
+        return self.__create(method_name, json=data)
+
     def store_details(self) -> dict:
         """ارجاع تفاصيل المتجر
 
