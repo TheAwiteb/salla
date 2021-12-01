@@ -418,7 +418,7 @@ ProductList.delete_(product)  # or ProductList.delete_(product.id)
 ##### اضافة فديو الى المنتج
 يمكنك اضافة فديو يوتيوب الى المنتج بالطريقة التالية
 
-
+</div>
 
 ```python
 from salla import Salla
